@@ -6,9 +6,11 @@ class Iniciar_sistema():
         self.root = tk.Tk()
         self.tela()
         self.frames_da_tela()
+        self.Menu_inicial = Menu_inicial(self)
+        self.Parto = Menu_do_Parto(self)
+        self.Médicos = Menu_do_Médico(self)
 
-        self.menu = [1, 0, 0, 0]
-        self.gerenciador_de_frames()
+        self.Menu_inicial.cria_Menu()
         self.root.mainloop()
 
     def tela(self):
@@ -17,150 +19,309 @@ class Iniciar_sistema():
         self.root.config(background='lightblue')
 
     def frames_da_tela(self):
-        self.frame_1 = tk.Frame(self.root)
-        self.frame_1.place(relx=0.02, rely=0.02, relwidth=0.96, relheight=0.46)
+        self.tela_ = tk.Frame(self.root)
+        self.tela_.place(relx=0.02, rely=0.02, relwidth=0.96, relheight=0.96)
+        # self.tela_.config(background='Blue')
 
-        self.frame_2 = tk.Frame()
-        self.frame_2.place(relx=0.02, rely=0.5, relwidth=0.96, relheight=0.46)
+        self.tab = tk.Label(self.tela_)
+        self.tab.grid(column=0, row=1, padx=2, pady=2)
+        self.tab_2 = tk.Label(self.tela_)
+        self.tab_2.grid(column=0, row=0, padx=2, pady=2)
 
-    def gerenciador_de_frames(self):
-        print(self.menu)
-        if self.menu[0]:
-            self.menu_inicial()
-        elif self.menu[1]:
-            self.limpar_menu()
-            self.cadastrar_mãe()
-        elif self.menu[2]:
-            self.limpar_menu()
-            self.cadastrar_bebê()
-        elif self.menu[3]:
-            self.limpar_menu()
-            self.cadastrar_médico()
-        else:
-            print("Erro de Validação de janelas")
 
-    def menu_inicial(self):
+class Menu_inicial():
+    def __init__(self, base: Iniciar_sistema) -> None:
+        self.base = base
 
-        self.menu = [1, 0, 0, 0]
-
+    def cria_Menu(self):
         self.intro = tk.Label(
-            self.frame_1,
-            text="Selecione a Opção de Cadastro",
-            justify='left'
+            self.base.tela_,
+            text="Selecione a Opção de Cadastro"
         )
-        self.intro.place(relx=0.01, rely=0.1, relwidth=0.3, relheight=0.1)
-
-        # Botão cadastrar Mãe
-        self.bt_mãe = tk.Button(
-            self.frame_1,
-            text="Cadastrar Mãe",
-            command=self.mudar_para_mãe
+        self.intro.grid(
+            column=1, row=1,
+            padx=0.5, pady=0.5,
+            sticky='W'
         )
-        self.bt_mãe.place(relx=0.05, rely=0.3, relwidth=0.15, relheight=0.1)
 
-        # Botão cadastrar Bebê
-        self.bt_bebê = tk.Button(
-            self.frame_1,
-            text="Cadastrar Bebê",
-            command=self.mudar_para_bebê
+        self.bt_parto = tk.Button(
+            self.base.tela_,
+            text="Cadastrar Parto",
+            command=self.base.Parto.cria_Parto
         )
-        self.bt_bebê.place(relx=0.05, rely=0.45, relwidth=0.15, relheight=0.1)
+        self.bt_parto.grid(column=2, row=1, padx=0.5, pady=0.5)
 
-        # Botão cadastrar Médico
         self.bt_médico = tk.Button(
-            self.frame_1,
+            self.base.tela_,
             text="Cadastrar Médico",
-            command=self.mudar_para_médico
+            command=self.base.Médicos.cria_Médico
         )
-        self.bt_médico.place(relx=0.05, rely=0.6,
-                             relwidth=0.15, relheight=0.1)
+        self.bt_médico.grid(column=3, row=1, padx=0.5, pady=0.5)
+
+    def fechar_Menu(self):
+        self.intro.destroy()
+        self.bt_parto.destroy()
+        self.bt_médico.destroy()
+
+
+class Menu_do_Parto():
+    def __init__(self, base: Iniciar_sistema) -> None:
+        self.base = base
+        self.status_mãe: bool = False
+
+    def cria_Parto(self):
+        self.base.Menu_inicial.fechar_Menu()
+
+        # Informações do Médico
+        self.info_médico = tk.Label(
+            self.base.tela_,
+            text="CRM do Médico Responsável: ",
+        )
+        self.info_médico.grid(
+            column=1, row=1,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.caixa_crm = tk.Entry(self.base.tela_)
+        self.caixa_crm.grid(
+            column=2, row=1, columnspan=2,
+            padx=0.5, pady=0.5
+        )
+
+        self.caixa_crm.focus()
+
+        # Pedir informações da mãe
+        self.info_mãe = tk.Label(
+            self.base.tela_,
+            text="Mãe cadastrada? ",
+        )
+        self.info_mãe.grid(
+            column=1, row=2,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        # A mãe já está no sistema?
+        self.valida = tk.BooleanVar()
+
+        self.var_0 = tk.Radiobutton(
+            self.base.tela_,
+            text='Sim',
+            variable=self.valida,
+            value=True,
+            command=self.deleta_cadastrar_mãe
+        )
+        self.var_1 = tk.Radiobutton(
+            self.base.tela_,
+            text='Não',
+            variable=self.valida,
+            value=False,
+            command=self.cadastrar_mãe
+        )
+
+        self.var_0.grid(column=2, row=2, padx=0.5, pady=0.5)
+        self.var_1.grid(column=3, row=2, padx=0.5, pady=0.5)
+
+        self.var_0.select()
+
+        # CPF
+        self.info_cpf = tk.Label(
+            self.base.tela_,
+            text="CPF: ",
+        )
+        self.info_cpf.grid(
+            column=1, row=3,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.cpf = tk.Entry(self.base.tela_)
+        self.cpf.grid(
+            column=2, row=3, columnspan=2,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        # Definir Numero de Recém Nascido
+        self.info_número_rn = tk.Label(
+            self.base.tela_,
+            text='Número de Recém Nascidos:'
+        )
+        self.info_número_rn.grid(
+            column=1, row=8,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.número_rn = tk.Entry(self.base.tela_)
+        self.número_rn.grid(
+            column=2, row=8,
+            padx=0.5, pady=0.5,
+            sticky='W'
+        )
+
+        # Botão de Enviar
+        self.bt_enviar = tk.Button(
+            self.base.tela_,
+            text='Enviar',
+            command=self.enviar
+        )
+        self.bt_enviar.grid(column=4, row=10, sticky='E')
+
+        # Botão Voltar
+        self.bt_voltar_parto = tk.Button(
+            self.base.tela_,
+            text="Voltar",
+            command=self.fechar_Parto
+        )
+        self.bt_voltar_parto.grid(column=1, row=10, sticky='W')
+
+    def fechar_Parto(self):
+        self.info_médico.destroy()
+        self.caixa_crm.destroy()
+        self.info_mãe.destroy()
+        self.bt_enviar.destroy()
+        self.var_0.destroy()
+        self.var_1.destroy()
+        self.info_cpf.destroy()
+        self.cpf.destroy()
+
+        if self.status_mãe:
+            self.deleta_cadastrar_mãe()
+
+        self.info_número_rn.destroy()
+        self.número_rn.destroy()
+
+        self.bt_voltar_parto.destroy()
+        self.base.Menu_inicial.cria_Menu()
+
+    def enviar(self):
+        print("CRN:", self.caixa_crm.get())
+        print("Mãe cadastrada?:", self.valida.get())
 
     def cadastrar_mãe(self):
+        if self.status_mãe:
+            print('Não Criou as informações')
+            return
+
+        print('Criou as informações')
+        # Nome
+        self.informe_nome_mãe = tk.Label(
+            self.base.tela_,
+            text="Nome: ",
+        )
+        self.informe_nome_mãe.grid(
+            column=1, row=4,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.nome_mãe = tk.Entry(self.base.tela_)
+        self.nome_mãe.grid(
+            column=2, row=4, columnspan=3,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        # Endereço
+        self.informe_endereço = tk.Label(
+            self.base.tela_,
+            text="Endereço: ",
+        )
+        self.informe_endereço.grid(
+            column=1, row=5,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.endereço = tk.Entry(self.base.tela_)
+        self.endereço.grid(
+            column=2, row=5, columnspan=3,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        # Telefone
+        self.informe_telefone = tk.Label(
+            self.base.tela_,
+            text="Telefone: ",
+        )
+        self.informe_telefone.grid(
+            column=1, row=6,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.telefone = tk.Entry(self.base.tela_)
+        self.telefone.grid(
+            column=2, row=6, columnspan=3,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        # Data Nascimento
+        self.informe_data_n = tk.Label(
+            self.base.tela_,
+            text="Data de Nascimento: ",
+        )
+        self.informe_data_n.grid(
+            column=1, row=7,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.data_n = tk.Entry(self.base.tela_)
+        self.data_n.grid(
+            column=2, row=7, columnspan=3,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        self.status_mãe = True
+
+    def deleta_cadastrar_mãe(self):
+        if not (self.status_mãe):
+            print('Não deletou')
+            return
+
+        print('Deletou tudo')
+        self.informe_nome_mãe.destroy()
+        self.nome_mãe.destroy()
+        self.informe_endereço.destroy()
+        self.endereço.destroy()
+        self.informe_telefone.destroy()
+        self.telefone.destroy()
+        self.informe_data_n.destroy()
+        self.data_n.destroy()
+
+        self.status_mãe = False
+
+
+class Menu_do_Médico():
+    def __init__(self, base: Iniciar_sistema) -> None:
+        self.base = base
+
+    def cria_Médico(self):
+        self.base.Menu_inicial.fechar_Menu()
         self.intro = tk.Label(
-            self.frame_1,
-            text="Cadastre a mãe",
-            justify='left'
+            self.base.tela_,
+            text="Cadastre o médico"
         )
-        self.intro.place(relx=0.01, rely=0.1, relwidth=0.3, relheight=0.1)
-
-        # Botão Voltar
-        self.bt_voltar_mãe = tk.Button(
-            self.frame_2,
-            text="Voltar",
-            command=self.limpar_mãe
-        )
-        self.bt_voltar_mãe.place(relx=0.83, rely=0.85,
-                                 relwidth=0.15, relheight=0.1)
-
-    def cadastrar_bebê(self):
-        self.intro = tk.Label(
-            self.frame_1,
-            text="Cadastre o bebê",
-            justify='left'
-        )
-        self.intro.place(relx=0.01, rely=0.1, relwidth=0.3, relheight=0.1)
-
-        # Botão Voltar
-        self.bt_voltar_bebê = tk.Button(
-            self.frame_2,
-            text="Voltar",
-            command=self.limpar_bebê
-        )
-        self.bt_voltar_bebê.place(relx=0.83, rely=0.85,
-                                  relwidth=0.15, relheight=0.1)
-
-    def cadastrar_médico(self):
-        self.intro = tk.Label(
-            self.frame_1,
-            text="Cadastre o médico",
-            justify='left'
-        )
-        self.intro.place(relx=0.01, rely=0.1, relwidth=0.3, relheight=0.1)
+        self.intro.place(relx=0.01, rely=0.1)
 
         # Botão Voltar
         self.bt_voltar_médico = tk.Button(
-            self.frame_2,
+            self.base.tela_,
             text="Voltar",
             command=self.limpar_médico
         )
         self.bt_voltar_médico.place(relx=0.83, rely=0.85,
                                     relwidth=0.15, relheight=0.1)
 
-    def limpar_mãe(self):
-        self.menu = [1, 0, 0, 0]
-        self.bt_voltar_mãe.destroy()
-        self.gerenciador_de_frames()
+    def fechar_Médico(self):
 
-    def limpar_bebê(self):
-        self.menu = [1, 0, 0, 0]
-        self.bt_voltar_bebê.destroy()
-        self.gerenciador_de_frames()
-
-    def limpar_médico(self):
-        self.menu = [1, 0, 0, 0]
-        self.bt_voltar_médico.destroy()
-        self.gerenciador_de_frames()
-
-    def limpar_menu(self):
-        self.intro.destroy()
-        self.bt_mãe.destroy()
-        self.bt_bebê.destroy()
-        self.bt_médico.destroy()
-
-    def mudar_para_mãe(self):
-        print("cadastra mãe")
-        self.menu = [0, 1, 0, 0]
-        self.gerenciador_de_frames()
-
-    def mudar_para_bebê(self):
-        print("cadastra bebê")
-        self.menu = [0, 0, 1, 0]
-        self.gerenciador_de_frames()
-
-    def mudar_para_médico(self):
-        print("cadastra médico")
-        self.menu = [0, 0, 0, 1]
-        self.gerenciador_de_frames()
+        self.base.Menu_inicial.cria_Menu()
 
 
 Iniciar_sistema()
