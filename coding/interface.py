@@ -12,14 +12,19 @@ class Iniciar_sistema():
         self.Parto = Menu_do_Parto(self)
         self.Médicos = Menu_do_Médico(self)
 
-        self.Menu_inicial.cria_Menu()
+        self.login_p = "senha"
+        self.senha_p = "senha"
+        self.erro = False
+
+        self.tela_login()
         self.root.mainloop()
 
     def tela(self):
-        self.root.title("Menu Inicial")
-        self.root.geometry("700x500")
+        self.root.title("MATERNIDADE MARIA")
         self.root.config(background='lightblue')
-
+        self.root.geometry("425x265")
+        self.root.resizable(False, False)
+        
     def frames_da_tela(self):
         self.tela_ = tk.Frame(self.root)
         self.tela_.place(relx=0.02, rely=0.02, relwidth=0.96, relheight=0.96)
@@ -29,6 +34,65 @@ class Iniciar_sistema():
         self.tab.grid(column=0, row=1, padx=2, pady=2)
         self.tab_2 = tk.Label(self.tela_)
         self.tab_2.grid(column=0, row=0, padx=2, pady=2)
+
+    def tela_login(self):
+
+        self.login = tk.Label(
+            self.tela_,
+            text="Login:"
+        )
+        self.login.grid(column=1, row=1, padx=2, pady=2)
+
+        self.login_En = tk.Entry(self.tela_)
+        self.login_En.grid(column=2, row=1, padx=2, pady=2)
+
+        self.senha = tk.Label(
+            self.tela_,
+            text="Senha:"
+        )
+        self.senha.grid(column=1, row=2, padx=2, pady=2)
+
+        self.senha_En = tk.Entry(self.tela_)
+        self.senha_En.grid(column=2, row=2, padx=2, pady=2)
+
+        self.bt1 = tk.Button(self.tela_, text="Confirmar",
+                             command=self.validar_senha)
+        self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
+
+    def validar_senha(self):
+        login_valido = self.login_En.get() == self.login_p
+        senha_valida = self.senha_En.get() == self.senha_p
+
+        if login_valido and senha_valida:
+            self.deleta_login()
+            self.Menu_inicial.cria_Menu()
+        else:
+            self.erro_de_login()
+            return
+
+    def erro_de_login(self):
+        if not (self.erro):
+            self.er_senha = tk.Label(
+                self.tela_,
+                text="Senha ou Login Incorreto",
+                border=1,
+                background='grey',
+            )
+            self.er_senha.grid(
+                column=0, row=10,
+                padx=2, pady=2, columnspan=3,
+                sticky='WE'
+            )
+            self.erro = True
+
+    def deleta_login(self):
+        self.login.destroy()
+        self.senha.destroy()
+        self.login_En.destroy()
+        self.senha_En.destroy()
+        if self.erro:
+            self.er_senha.destroy()
+        self.bt1.destroy()
 
 
 class Menu_inicial():
@@ -71,12 +135,14 @@ class Menu_do_Parto():
         self.base = base
 
         self.status_mãe: bool = False
-        self.erro_mostrado: bool = False
+        self.erro_mostrado_1: bool = False
+        self.erro_mostrado_2: bool = False
         self.enviado: bool = False
 
         self.mãe: Mãe = Mãe()
         self.médico: Médico = Médico()
         self.bebê: Bebê = Bebê(self)
+        self.numero = self.mãe.num_filhos
 
     def cria_Parto(self):
         self.base.Menu_inicial.fechar_Menu()
@@ -288,17 +354,29 @@ class Menu_do_Parto():
 
     def fechar_Parto(self):
         valor = int(self.número_rn.get()) if self.número_rn.get() != '' else 0
-        print(self.erro_mostrado)
-        print(self.enviado, "AAAA")
+
         if self.enviado and valor <= 0:
-            if not (self.erro_mostrado):
+            if not (self.erro_mostrado_1):
                 print("Error - Numero de Recém Nascidos INVALIDO")
                 self.error_message_1 = tk.Label(
                     self.base.tela_,
                     text='Error - Numero de Recém Nascidos INVALIDO'
                 )
                 self.error_message_1.grid(column=5, row=10, sticky='E')
-                self.erro_mostrado = True
+                self.erro_mostrado_1 = True
+            self.enviado = False
+            return
+
+        if self.enviado and (self.cpf.get() == '' or
+                             self.caixa_crm.get() == ''):
+            if not (self.erro_mostrado_2):
+                print("Error - Insira o CPF da Mãe e o CRM do Médico")
+                self.error_message_2 = tk.Label(
+                    self.base.tela_,
+                    text="Error - Insira o CPF da Mãe e o CRM do Médico"
+                )
+                self.error_message_2.grid(column=5, row=11, sticky='E')
+                self.erro_mostrado_2 = True
             self.enviado = False
             return
 
@@ -311,8 +389,8 @@ class Menu_do_Parto():
         self.info_cpf.destroy()
         self.cpf.destroy()
 
-        if self.erro_mostrado:
-            self.erro_mostrado = False
+        if self.erro_mostrado_1:
+            self.erro_mostrado_1 = False
             self.error_message_1.destroy()
 
         if self.status_mãe:
@@ -326,7 +404,7 @@ class Menu_do_Parto():
         if not (self.enviado):
             self.base.Menu_inicial.cria_Menu()
         else:
-            self.bebê.cadastrar_bebê(self)
+            self.bebê.cadastrar_bebê()
 
     def enviar(self):
         self.mãe.cpf = self.cpf.get()
@@ -342,6 +420,7 @@ class Menu_do_Parto():
             self.mãe.telefone = 'default'
             self.mãe.data_nasci = '00-00-00'
 
+        self.mãe.num_filhos = self.número_rn.get()
         enviar_dado_mãe(self.mãe)
         self.enviado = True
         self.fechar_Parto()
@@ -353,24 +432,107 @@ class Menu_do_Médico():
 
     def cria_Médico(self):
         self.base.Menu_inicial.fechar_Menu()
-        self.intro = tk.Label(
+
+        # Informações do Médico
+        self.info_médico = tk.Label(
             self.base.tela_,
-            text="Cadastre o médico"
+            text="Para cadastrar os Médicos preencha as informações a baixo: ",
         )
-        self.intro.place(relx=0.01, rely=0.1)
+        self.info_médico.grid(
+            column=1, row=1, columnspan=10,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        # CRM
+        self.info_CRM = tk.Label(
+            self.base.tela_,
+            text="CRM: ",
+        )
+        self.info_CRM.grid(
+            column=1, row=2,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.CRM = tk.Entry(self.base.tela_)
+        self.CRM.grid(
+            column=2, row=2, columnspan=3,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        # Especialidade
+        self.info_espec = tk.Label(
+            self.base.tela_,
+            text="Especialidade: ",
+        )
+        self.info_espec.grid(
+            column=1, row=3,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.espec = tk.Entry(self.base.tela_)
+        self.espec.grid(
+            column=2, row=3, columnspan=3,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        # Nome
+        self.info_nome = tk.Label(
+            self.base.tela_,
+            text="Nome: ",
+        )
+        self.info_nome.grid(
+            column=1, row=4,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
+
+        self.med_nome = tk.Entry(self.base.tela_)
+        self.med_nome.grid(
+            column=2, row=4, columnspan=3,
+            padx=0.5, pady=0.5,
+            sticky='WE'
+        )
+
+        # Botão de Enviar
+        self.bt_enviar = tk.Button(
+            self.base.tela_,
+            text='Enviar',
+            command=self.enviar
+        )
+        self.bt_enviar.grid(column=4, row=100, sticky='E')
 
         # Botão Voltar
-        self.bt_voltar_médico = tk.Button(
+        self.bt_voltar = tk.Button(
             self.base.tela_,
             text="Voltar",
-            command=self.limpar_médico
+            command=self.voltar
         )
-        self.bt_voltar_médico.place(relx=0.83, rely=0.85,
-                                    relwidth=0.15, relheight=0.1)
+        self.bt_voltar.grid(column=1, row=100, sticky='W')
 
     def fechar_Médico(self):
+        self.info_médico.destroy()
+        self.info_CRM.destroy()
+        self.CRM.destroy()
+        self.info_espec.destroy()
+        self.espec.destroy()
+        self.info_nome.destroy()
+        self.med_nome .destroy()
+
+        self.bt_enviar.destroy()
+        self.bt_voltar.destroy()
 
         self.base.Menu_inicial.cria_Menu()
+
+    def voltar(self):
+        self.fechar_Médico()
+
+    def enviar(self):
+        pass
 
 
 class Bebê():
@@ -388,9 +550,12 @@ class Bebê():
 
         self.médico: Médico = self.parto.médico
         self.mãe: Mãe = self.parto.mãe
+        self.numero: int = 1
 
-    def cadastrar_bebê(self, numero: int = 0):
-        self.numero = numero
+        self.voltando = False
+        self.mensagem_erro = False
+
+    def cadastrar_bebê(self):
 
         # self.nome: str
         self.informe_nome = tk.Label(
@@ -586,9 +751,13 @@ class Bebê():
         self.bt_voltar_parto = tk.Button(
             self.base.tela_,
             text="Voltar",
-            command=self.fechar_bebê
+            command=self.voltar
         )
         self.bt_voltar_parto.grid(column=1, row=10, sticky='W')
+
+    def voltar(self):
+        self.voltando = True
+        self.fechar_bebê()
 
     def fechar_bebê(self):
         self.informe_nome.destroy()
@@ -596,6 +765,7 @@ class Bebê():
         self.informe_sexo.destroy()
         self.var_0.destroy()
         self.var_1.destroy()
+        self.var_2.destroy()
         self.informe_peso.destroy()
         self.peso_bebê.destroy()
         self.informe_altura.destroy()
@@ -612,10 +782,30 @@ class Bebê():
         self.var_sobreviveu_1.destroy()
         self.bt_voltar_parto.destroy()
         self.bt_enviar.destroy()
-        self.parto.cria_Parto()
+        if self.mensagem_erro:
+            self.mensagem_erro = False
+            self.error_message_1.destroy()
+
+        if self.numero >= 1 and not (self.voltando):
+            self.numero -= 1
+            self.cadastrar_bebê()
+        else:
+            self.parto.cria_Parto()
 
     def enviar(self):
-
+        if (self.nome_bebê.get() == '' or self.sexo_bebe.get() == '' or
+            self.peso_bebê.get() == '' or self.altura_bebê.get() == '' or
+            self.data_bebê.get() == '' or self.hora_bebê.get() == '' or
+                self.pre_bebê.get() == '' or self.sob_bebê.get() == ''):
+            print("Error - Preencha todos os campos")
+            if not (self.mensagem_erro):
+                self.error_message_1 = tk.Label(
+                    self.base.tela_,
+                    text='Error - Preencha todos os campos'
+                )
+                self.error_message_1.grid(column=5, row=10, sticky='E')
+                self.mensagem_erro = True
+            return
         self.nome = self.nome_bebê.get()
         self.sexo = self.sexo_bebe.get()
         self.peso = self.peso_bebê.get()
@@ -638,11 +828,6 @@ class Bebê():
         self.prematuro = False
 
         self.fechar_bebê()
-        if (self.numero-1) >= 0:
-            self.cadastrar_bebê(self, self.numero-1)
-        else:
-            print("Todos os Bebês foram Cadastrados")
-            self.fechar_bebê()
 
 
 class Mãe():
@@ -652,6 +837,7 @@ class Mãe():
         self.endereço: str = ''
         self.telefone: str = ''
         self.data_nasci: str = ''
+        self.num_filhos: int = 0
 
 
 class Médico():
@@ -671,7 +857,8 @@ def enviar_dado_bebê(bebe: Bebê):
     Data de Nascimento do bebê: {bebe.data_nasci}
     Horário de Nascimento do bebê: {bebe.hora_nasci}
     Prematuro? {bebe.prematuro}
-    Sobreviveu?: {bebe.sobrevive}
+    Sobreviveu? {bebe.sobrevive}
+    CPF da Mãe: {bebe.mãe.cpf}
     """)
 
 
