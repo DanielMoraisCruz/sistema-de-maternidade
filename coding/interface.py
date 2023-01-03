@@ -24,7 +24,7 @@ class Iniciar_sistema():
         self.root.config(background='lightblue')
         self.root.geometry("425x265")
         self.root.resizable(False, False)
-        
+
     def frames_da_tela(self):
         self.tela_ = tk.Frame(self.root)
         self.tela_.place(relx=0.02, rely=0.02, relwidth=0.96, relheight=0.96)
