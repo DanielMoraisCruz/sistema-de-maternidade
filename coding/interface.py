@@ -12,8 +12,8 @@ class Iniciar_sistema():
         self.Parto = Menu_do_Parto(self)
         self.Médicos = Menu_do_Médico(self)
 
-        self.login_p = "senha"
-        self.senha_p = "senha"
+        self.login_test = "senha"
+        self.senha_test = "senha"
         self.erro = False
 
         self.tela_login()
@@ -60,8 +60,8 @@ class Iniciar_sistema():
         self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
 
     def validar_senha(self):
-        login_valido = self.login_En.get() == self.login_p
-        senha_valida = self.senha_En.get() == self.senha_p
+        login_valido = self.login_En.get() == self.login_test
+        senha_valida = self.senha_En.get() == self.senha_test
 
         if login_valido and senha_valida:
             self.deleta_login()
