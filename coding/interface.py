@@ -1,7 +1,5 @@
 import tkinter as tk
 
-# from datetime import date, tim
-
 
 class Iniciar_sistema():
     def __init__(self) -> None:
@@ -12,8 +10,8 @@ class Iniciar_sistema():
         self.Parto = Menu_do_Parto(self)
         self.Médicos = Menu_do_Médico(self)
 
-        self.login_test = "senha"
-        self.senha_test = "senha"
+        self.login_test = ""
+        self.senha_test = ""
         self.erro = False
 
         self.tela_login()
@@ -22,7 +20,7 @@ class Iniciar_sistema():
     def tela(self):
         self.root.title("MATERNIDADE MARIA")
         self.root.config(background='lightblue')
-        self.root.geometry("425x265")
+        self.root.geometry("700x500")
         self.root.resizable(False, False)
 
     def frames_da_tela(self):
@@ -41,9 +39,11 @@ class Iniciar_sistema():
             self.tela_,
             text="Login:"
         )
+        # self.login.place(relheight=0.1, relwidth=0.1)
         self.login.grid(column=1, row=1, padx=2, pady=2)
 
         self.login_En = tk.Entry(self.tela_)
+        # self.login_En.place(relheight=0.01, relwidth=0.1)
         self.login_En.grid(column=2, row=1, padx=2, pady=2)
 
         self.senha = tk.Label(
@@ -139,12 +139,20 @@ class Menu_do_Parto():
         self.erro_mostrado_2: bool = False
         self.enviado: bool = False
 
-        self.mãe: Mãe = Mãe()
-        self.médico: Médico = Médico()
-        self.bebê: Bebê = Bebê(self)
-        self.numero = self.mãe.num_filhos
+        self.mãe: Mãe
+        self.médico: Médico
+
+        self.val_erro: bool = True
 
     def cria_Parto(self):
+
+        self.status_mãe = False
+        self.erro_mostrado_1 = False
+        self.erro_mostrado_2 = False
+        self.enviado = False
+
+        self.mãe = Mãe()
+        self.médico = Médico()
         self.base.Menu_inicial.fechar_Menu()
 
         # Informações do Médico
@@ -393,6 +401,10 @@ class Menu_do_Parto():
             self.erro_mostrado_1 = False
             self.error_message_1.destroy()
 
+        if self.erro_mostrado_2:
+            self.erro_mostrado_2 = False
+            self.error_message_2.destroy()
+
         if self.status_mãe:
             self.deleta_cadastrar_mãe()
 
@@ -404,7 +416,11 @@ class Menu_do_Parto():
         if not (self.enviado):
             self.base.Menu_inicial.cria_Menu()
         else:
-            self.bebê.cadastrar_bebê()
+            self.inserir_bebês()
+
+    def inserir_bebês(self):
+        bebe_temp = Bebê(self)
+        bebe_temp.cadastrar_bebê()
 
     def enviar(self):
         self.mãe.cpf = self.cpf.get()
@@ -420,7 +436,7 @@ class Menu_do_Parto():
             self.mãe.telefone = 'default'
             self.mãe.data_nasci = '00-00-00'
 
-        self.mãe.num_filhos = self.número_rn.get()
+        self.mãe.num_filhos = int(self.número_rn.get())
         enviar_dado_mãe(self.mãe)
         self.enviado = True
         self.fechar_Parto()
@@ -429,6 +445,7 @@ class Menu_do_Parto():
 class Menu_do_Médico():
     def __init__(self, base: Iniciar_sistema) -> None:
         self.base = base
+        self.lista_médicos: list = []
 
     def cria_Médico(self):
         self.base.Menu_inicial.fechar_Menu()
@@ -514,25 +531,48 @@ class Menu_do_Médico():
         )
         self.bt_voltar.grid(column=1, row=100, sticky='W')
 
-    def fechar_Médico(self):
+    def fechar_Médico(self, enviar: bool = False):
         self.info_médico.destroy()
         self.info_CRM.destroy()
         self.CRM.destroy()
         self.info_espec.destroy()
         self.espec.destroy()
         self.info_nome.destroy()
-        self.med_nome .destroy()
+        self.med_nome.destroy()
 
         self.bt_enviar.destroy()
         self.bt_voltar.destroy()
 
-        self.base.Menu_inicial.cria_Menu()
+        if not (self.val_erro):
+            self.error_message.destroy()
+
+        self.cria_Médico() if enviar else self.base.Menu_inicial.cria_Menu()
 
     def voltar(self):
         self.fechar_Médico()
 
     def enviar(self):
-        pass
+        self.medico_ = Médico(
+            self.CRM.get(),
+            self.espec.get(),
+            self.med_nome.get()
+        )
+
+        if not ((self.medico_.crm == '') or (self.medico_.espec == '') or
+                (self.medico_.nome == '')):
+
+            self.base.Médicos.lista_médicos.append(self.medico_)
+            self.fechar_Médico(True)
+        else:
+            # Mostra erro
+            if self.val_erro:  # val_error está disponível?
+                print("Error - Numero de Recém Nascidos INVALIDO")
+                self.error_message = tk.Label(
+                    self.base.tela_,
+                    text='Error - Numero de Recém Nascidos INVALIDO'
+                )
+                self.error_message.grid(column=5, row=10, sticky='E')
+                self.val_erro = False
 
 
 class Bebê():
@@ -550,12 +590,22 @@ class Bebê():
 
         self.médico: Médico = self.parto.médico
         self.mãe: Mãe = self.parto.mãe
-        self.numero: int = 1
+        self.numero_do_bebe: int = 1
 
         self.voltando = False
         self.mensagem_erro = False
 
     def cadastrar_bebê(self):
+
+        self.titulo = tk.Label(
+            self.base.tela_,
+            text=f"Insira o {len(self.mãe.lista_filhos)+1}° Bebê: ",
+        )
+        self.titulo.grid(
+            column=1, row=0,
+            padx=0.5, pady=0.5,
+            sticky='E'
+        )
 
         # self.nome: str
         self.informe_nome = tk.Label(
@@ -760,6 +810,7 @@ class Bebê():
         self.fechar_bebê()
 
     def fechar_bebê(self):
+        self.titulo.destroy()
         self.informe_nome.destroy()
         self.nome_bebê.destroy()
         self.informe_sexo.destroy()
@@ -786,9 +837,9 @@ class Bebê():
             self.mensagem_erro = False
             self.error_message_1.destroy()
 
-        if self.numero >= 1 and not (self.voltando):
-            self.numero -= 1
-            self.cadastrar_bebê()
+        self.ver = len(self.mãe.lista_filhos) < int(self.mãe.num_filhos)
+        if self.ver and not (self.voltando):
+            self.parto.inserir_bebês()
         else:
             self.parto.cria_Parto()
 
@@ -806,26 +857,8 @@ class Bebê():
                 self.error_message_1.grid(column=5, row=10, sticky='E')
                 self.mensagem_erro = True
             return
-        self.nome = self.nome_bebê.get()
-        self.sexo = self.sexo_bebe.get()
-        self.peso = self.peso_bebê.get()
-        self.altura = self.altura_bebê.get()
-        self.data_nasci = self.data_bebê.get()
-        self.hora_nasci = self.hora_bebê.get()
-        self.prematuro = self.pre_bebê.get()
-        self.sobrevive = self.sob_bebê.get()
 
-        # envia os dados para o
-        enviar_dado_bebê(self)
-
-        self.nome = ''
-        self.sexo = ''
-        self.peso = 0.0
-        self.altura = 0.0
-        self.data_nasci = ''
-        self.hora_nasci = ''
-        self.sobrevive = True
-        self.prematuro = False
+        self.mãe.lista_filhos.append(self)
 
         self.fechar_bebê()
 
@@ -838,13 +871,14 @@ class Mãe():
         self.telefone: str = ''
         self.data_nasci: str = ''
         self.num_filhos: int = 0
+        self.lista_filhos: list = []
 
 
 class Médico():
-    def __init__(self) -> None:
-        self.crm: str = ''
-        self.espec: str = ''
-        self.nome: str = ''
+    def __init__(self, crm='', espec='', nome='') -> None:
+        self.crm: str = crm
+        self.espec: str = espec
+        self.nome: str = nome
 
 
 def enviar_dado_bebê(bebe: Bebê):
