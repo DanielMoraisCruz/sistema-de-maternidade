@@ -905,3 +905,4 @@ def enviar_dado_médico(médico: Médico):
 
 
 Iniciar_sistema()
+
