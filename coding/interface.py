@@ -129,6 +129,18 @@ class Menu_inicial():
         self.bt_parto.destroy()
         self.bt_médico.destroy()
 
+    def receber_info_mãe(self):
+        # ----  PEGAR INFOS DE MÃE  ---- #
+        pass
+
+    def receber_info_médico(self):
+        # ----  PEGAR INFOS DE MÉDICO  ---- #
+        pass
+
+    def receber_info_bebê(self):
+        # ----  PEGAR INFOS DE BEBÊ  ---- #
+        pass
+
 
 class Menu_do_Parto():
     def __init__(self, base: Iniciar_sistema) -> None:
@@ -437,7 +449,9 @@ class Menu_do_Parto():
             self.mãe.data_nasci = '00-00-00'
 
         self.mãe.num_filhos = int(self.número_rn.get())
-        enviar_dado_mãe(self.mãe)
+
+        # ----  ENVIAR MÃE  ---- #
+
         self.enviado = True
         self.fechar_Parto()
 
@@ -562,6 +576,9 @@ class Menu_do_Médico():
                 (self.medico_.nome == '')):
 
             self.base.Médicos.lista_médicos.append(self.medico_)
+
+            # ----  ENVIAR MÉDICO  ---- #
+
             self.fechar_Médico(True)
         else:
             # Mostra erro
@@ -905,4 +922,3 @@ def enviar_dado_médico(médico: Médico):
 
 
 Iniciar_sistema()
-
