@@ -1,4 +1,6 @@
 import tkinter as tk
+import mysql.connector
+
 
 
 class Iniciar_sistema():
@@ -876,6 +878,8 @@ class Bebê():
             return
 
         self.mãe.lista_filhos.append(self)
+
+        # ---- ENVIAR BEEB ---- #
 
         self.fechar_bebê()
 
