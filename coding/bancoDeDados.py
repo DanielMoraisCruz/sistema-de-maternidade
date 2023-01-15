@@ -1,5 +1,5 @@
 import mysql.connector
-from interface import Bebê, Mãe, Médico
+from interface import Bebê, Mãe, Médico, Menu_do_Parto
 
 conexao = mysql.connector.connect(  # funcao que realiza a conexão entre o programa e o BD
     host='localhost',  # passar o host, se o BD estiver no seu computador use local Host
@@ -61,3 +61,37 @@ def BD_export_medico(medico: Médico):
                  "{medico.nome}")'''
     cursor.execute(comando)
     conexao.commit()
+
+
+def BD_export_parto(parto: Menu_do_Parto):
+    if parto.mãe.num_filhos > 1:
+        comando = f'''INSERT INTO parto (CPF_mae, CRM_medico, COD_parto, Data_parto, Gemeos, Num_Gemeos) VALUES (
+                  "{parto.mãe.cpf}",
+                  "{parto.médico.crm}",
+                  "{parto.cod_parto}",
+                  "{parto.data_n}",
+                  "{'S'}",
+                  "{parto.mãe.num_filhos}",'''
+    else:
+        comando = f'''INSERT INTO parto (CPF_mae, CRM_medico, COD_parto, Data_parto, Gemeos) VALUES (
+                    "{parto.mãe.cpf}",
+                    "{parto.médico.crm}",
+                    "{parto.cod_parto}",
+                    "{parto.data_n}",
+                    "{'N'}",'''
+
+
+def BD_getInfo_mae():
+    pass
+
+
+def BD_getInfo_medico():
+    pass
+
+
+def BD_getInfo_bebe():
+    pass
+
+
+def BD_getInfo_partp():
+    pass
