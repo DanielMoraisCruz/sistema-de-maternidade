@@ -158,6 +158,8 @@ class Menu_do_Parto():
 
         self.val_erro: bool = True
 
+        self.cod_parto: int
+
     def cria_Parto(self):
 
         self.status_mãe = False
@@ -430,6 +432,10 @@ class Menu_do_Parto():
         if not (self.enviado):
             self.base.Menu_inicial.cria_Menu()
         else:
+            # ---- ENVIA PARTO ----#
+
+            # ---- PEGA COD_PARTO ----#
+            self.cod_parto = 0
             self.inserir_bebês()
 
     def inserir_bebês(self):
