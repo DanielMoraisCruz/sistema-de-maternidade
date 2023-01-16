@@ -90,11 +90,14 @@ class Iniciar_sistema():
 
     def validar_senha(self):
         cpf = self.cpf_En.get()
-        self.alter_cpf = (cpf[0:3]+cpf[4:7] +
-                          cpf[8:11]+cpf[12:14])
+        self.alter_cpf = cpf
+        if (cpf[3] == '.' and cpf[7] == '.' and cpf[11] == '-'):
+            self.alter_cpf = (cpf[0:3]+cpf[4:7] +
+                              cpf[8:11]+cpf[12:14])  # 012.456.890-90
 
         self.user = Usuario(self.alter_cpf, self.senha_En.get())
-        if BD_Valida_admin(self.user):
+
+        if BD_Valida_admin(self.user) and len(self.alter_cpf) < 11:
             self.deleta_login()
             self.Menu_inicial.cria_Menu()
         else:
@@ -103,18 +106,30 @@ class Iniciar_sistema():
 
     def cadastrar(self):
         cpf = self.cpf_En.get()
+
         self.alter_cpf = (cpf[0:3]+cpf[4:7] +
                           cpf[8:11]+cpf[12:14])
+
+        if len(self.alter_cpf) < 11:
+            self.erro_de_login()
+            return
+
         print(self.alter_cpf)
         self.user = Usuario(self.alter_cpf, self.senha_En.get())
+        
+        if BD_Valida_admin(self.user, True):
+            print('CPF Já está Cadastrado')
+            self.erro_de_login('ou Já está Cadastrado')
+        
         BD_export_Admin(self.user)
 
-    def erro_de_login(self):
+    def erro_de_login(self, texto):
         if not (self.erro):
             self.er_senha = tk.Label(
                 self.tela_,
-                text="""Senha ou CPF Incorreto
-                        Tente inserir com a pontuação 000.000.000-00""",
+                text=f"""Senha ou CPF Incorreto {texto}
+                        Tente inserir com a pontuação 000.000.000-00
+                     """,
                 border=1,
                 background='grey',
             )
