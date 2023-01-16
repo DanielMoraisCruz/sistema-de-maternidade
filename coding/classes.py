@@ -16,6 +16,14 @@ class Médico():
         self.nome: str = nome
 
 
+class Parto():
+    def __init__(self) -> None:
+        self.mãe: Mãe
+        self.médico: Médico
+        self.cod_parto: int
+        self.data_n = "0000-00-00"
+
+
 class Bebê():
     def __init__(self, mae: Mãe, medico: Médico, parto) -> None:
         self.nome: str = ''

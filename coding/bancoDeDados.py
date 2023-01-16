@@ -1,5 +1,5 @@
 import mysql.connector
-from glopais import Bebê, Mãe, Médico, Usuario
+from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 conexao = mysql.connector.connect(  # funcao que realiza a conexão
                                     # entre o programa e o BD
@@ -69,7 +69,7 @@ def BD_export_medico(medico: Médico):
     conexao.commit()
 
 
-def BD_export_parto(parto):
+def BD_export_parto(parto: Parto):
     if parto.mãe.num_filhos > 1:
         comando = f'''INSERT INTO parto (CPF_mae, CRM_medico, COD_parto,
                       Data_parto, Gemeos, Num_Gemeos) VALUES (
@@ -106,6 +106,7 @@ def BD_Valida_admin(user: Usuario):
                   WHERE CPF = "{user.cpf}" AND senha = "{user.senha}"'''
     cursor.execute(comando)
     resultado = cursor.fetchall()  # ler o banco de dados
+    print(resultado)
     return (False if resultado == [] else True)
     # if resultado == []:
     #    print("usuario não existe")

@@ -1,8 +1,8 @@
 import tkinter as tk
 
 from bancoDeDados import BD_export_Admin, BD_getInfo_adim, BD_Valida_admin
+from classes import Bebê, Mãe, Médico, Parto, Usuario
 from codigos_externos import validate
-from glopais import Bebê, Mãe, Médico, Usuario
 
 
 class Iniciar_sistema():
@@ -79,7 +79,7 @@ class Iniciar_sistema():
         self.senha_En = tk.Entry(self.tela_)
         self.senha_En.grid(column=2, row=2, padx=2, pady=2)
 
-        if x:
+        if not (x):
             self.bt1 = tk.Button(self.tela_, text="Confirmar",
                                  command=self.validar_senha)
             self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
@@ -89,32 +89,48 @@ class Iniciar_sistema():
             self.bt2.grid(column=2, row=3, padx=2, pady=2, columnspan=2)
 
     def validar_senha(self):
-        self.user = Usuario(self.cpf_En.get(), self.senha_En.get())
-        if BD_Valida_admin(self.user):
-            self.deleta_login()
-            self.Menu_inicial.cria_Menu()
+        if validate(self.cpf_En.get()):
+            self.cpf = self.cpf_En.get()
+            self.alter_cpf = (self.cpf[0:3]+self.cpf[4:7] +
+                              self.cpf[8:11]+self.cpf[12:14])
+
+            self.user = Usuario(self.alter_cpf, self.senha_En.get())
+            if BD_Valida_admin(self.user):
+                self.deleta_login()
+                self.Menu_inicial.cria_Menu()
+            else:
+                self.erro_de_login()
+                return
         else:
+            print("CPF: não válido, insira como 000.000.000-00")
             self.erro_de_login()
             return
 
     def cadastrar(self):
-        self.user = Usuario(self.cpf_En.get(), self.senha_En.get())
-        if validate(self.user.cpf):
+        if validate(self.cpf_En.get()):
+            self.cpf = self.cpf_En.get()
+            self.alter_cpf = (self.cpf[0:3]+self.cpf[4:7] +
+                              self.cpf[8:11]+self.cpf[12:14])
+            print(self.alter_cpf)
+            self.user = Usuario(self.alter_cpf, self.senha_En.get())
             BD_export_Admin(self.user)
         else:
             print("CPF: não válido, insira como 000.000.000-00")
+            self.erro_de_login()
+            return
 
     def erro_de_login(self):
         if not (self.erro):
             self.er_senha = tk.Label(
                 self.tela_,
-                text="Senha ou Login Incorreto",
+                text="""Senha ou CPF Incorreto
+                        Tente inserir com a pontuação 000.000.000-00""",
                 border=1,
                 background='grey',
             )
             self.er_senha.grid(
                 column=0, row=10,
-                padx=2, pady=2, columnspan=3,
+                padx=2, pady=2, columnspan=2,
                 sticky='WE'
             )
             self.erro = True
@@ -174,13 +190,6 @@ class Menu_inicial():
     def receber_info_bebê(self):
         # ----  PEGAR INFOS DE BEBÊ  ---- #
         pass
-
-
-class Parto():
-    def __init__(self) -> None:
-        self.mãe: Mãe
-        self.médico: Médico
-        self.cod_parto: int
 
 
 class Menu_do_Parto():
@@ -492,7 +501,7 @@ class Menu_do_Parto():
             self.parto.mãe.nome = 'default'
             self.parto.mãe.endereço = 'default'
             self.parto.mãe.telefone = 'default'
-            self.parto.mãe.data_nasci = '00-00-00'
+            self.parto.mãe.data_nasci = '0000-00-00'
 
         self.parto.mãe.num_filhos = int(self.número_rn.get())
 
