@@ -908,4 +908,10 @@ class Médico():
         self.nome: str = nome
 
 
+class Usuario():
+    def __init__(self, cpf: str, senha: str) -> None:
+        self.cpf: str = cpf
+        self.senha: str = senha
+
+
 Iniciar_sistema()
