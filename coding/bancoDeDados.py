@@ -1,5 +1,5 @@
 import mysql.connector
-from interface import Bebê, Menu_do_Parto, Mãe, Médico
+from interface import Bebê, Menu_do_Parto, Mãe, Médico,Usuario
 
 conexao = mysql.connector.connect(  # funcao que realiza a conexão
                                     # entre o programa e o BD
@@ -95,17 +95,42 @@ def BD_export_Admin(User:Usuario):
     cursor.execute(comando)
     conexao.commit()
 
+def BD_getInfo_adim():
+    comando = f'SELECT cpf FROM maternidade.admins'
+    cursor.execute(comando)
+    resultado = cursor.fetchall() # ler o banco de dados
+    print(resultado)
+    return (False if resultado == [] else True)
+
+def BD_Valida_admin(user:Usuario):
+    comando = f'SELECT cpf FROM maternidade.admins WHERE CPF = "{user.cpf}" AND senha = "{user.senha}"'
+    cursor.execute(comando)
+    resultado = cursor.fetchall() # ler o banco de dados
+    return (False if resultado == [] else True)
+   #if resultado == []:
+   #    print("usuario não existe")
+   #else:
+   #    print("usuario existe")
+    
+
 def BD_getInfo_mae():
     pass
 
 
 def BD_getInfo_medico():
-    pass
+    comando = f'SELECT CRM,Nome FROM maternidade.medico'
+    cursor.execute(comando)
+    resultado = cursor.fetchall() # ler o banco de dados
+    print(resultado)
 
 
 def BD_getInfo_bebe():
     pass
 
 
-def BD_getInfo_partp():
+def BD_getInfo_parto():
     pass
+
+
+user = Usuario("1234","daniel")
+BD_Valida_admin(user)
