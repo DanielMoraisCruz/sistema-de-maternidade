@@ -6,7 +6,7 @@ conexao = mysql.connector.connect(  # funcao que realiza a conexão
     host='localhost',   # passar o host, se o BD estiver no seu computador use
                         # local Host
     user='root',  # Usuario do BD
-    password='3650',  # Senha do BD
+    password='OlljFVAZlRVsdNiTncrS',  # Senha do BD
     database='maternidade',  # Nome do esquema que será alterado
 )
 
@@ -100,6 +100,7 @@ def BD_export_Admin(User: Usuario):
 
 #   ----VALIDAR INFORMAÇÕES---- #
 
+
 def BD_Valida_admin(user: Usuario, p_cpf=False):
 
     if not (p_cpf):
@@ -113,21 +114,23 @@ def BD_Valida_admin(user: Usuario, p_cpf=False):
     print(resultado)
     return (False if resultado == [] else True)
 
+
 def BD_Valida_CPF_Mae(mae: Mãe, p_cpf=False):
     comando = f'''SELECT CPF FROM maternidade.mae
                   WHERE CPF = "{mae.cpf}"'''
     cursor.execute(comando)
     resultado = cursor.fetchall()
     print(resultado)
-    return(False if resultado == [] else True)
+    return (False if resultado == [] else True)
 
-def BD_Valida_CRM_Medico(doc:Médico):
+
+def BD_Valida_CRM_Medico(doc: Médico):
     comando = f'''SELECT CRM FROM maternidade.medico
                   WHERE CRM = "{doc.crm}"'''
     cursor.execute(comando)
     resultado = cursor.fetchall()
     print(resultado)
-    return(False if resultado == [] else True)
+    return (False if resultado == [] else True)
 
     #   ----CONSULTAR INFORMAÇÕES---- #
 
@@ -163,10 +166,12 @@ def BD_getInfo_bebe():
 
 
 def BD_ConsutaDiaria(data: str):
-    comando = f'''SELECT CRM, medico.Nome, parto.CPF_mae, mae.Nome,mae.Dt_nasc,bebe.Nome,Sexo,bebe.Dt_nasc,Peso, Altura
-                 FROM maternidade.medico, maternidade.mae, maternidade.bebe, maternidade.parto WHERE 
-                 Dt_parto = "{data}" AND bebe.Cod_parto = parto.Cod_parto
-                 AND CRM_medico = CRM and parto.CPF_mae = CPF'''
+    comando = f'''SELECT CRM, medico.Nome, parto.CPF_mae, mae.Nome,
+                  mae.Dt_nasc,bebe.Nome,Sexo,bebe.Dt_nasc,Peso, Altura
+                  FROM maternidade.medico, maternidade.mae,
+                  maternidade.bebe, maternidade.parto WHERE
+                  Dt_parto = "{data}" AND bebe.Cod_parto = parto.Cod_parto
+                  AND CRM_medico = CRM and parto.CPF_mae = CPF'''
     cursor.execute(comando)
     resultado = cursor.fetchall()
     print(resultado)

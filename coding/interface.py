@@ -37,28 +37,29 @@ class Iniciar_sistema():
 
     def escolha_inicial(self):
         if BD_getInfo_adim():
-            self.bt1 = tk.Button(self.tela_, text="Fazer Login",
-                                 command=self.enviar_login)
-            self.bt1.grid(column=1, row=1, padx=2, pady=2)
-            self.bt1_ = True
+            self.tela_login()
+        else:
+            self.tela_login(True)
 
-        self.bt2 = tk.Button(self.tela_, text="Cadastrar",
-                             command=self.enviar_cadastro)
-        self.bt2.grid(column=2, row=1, padx=2, pady=2)
+    def tela_login(self, cadastro=False):
+        self.cadastro = cadastro
 
-    def enviar_login(self):
-        self.bt1.destroy()
-        self.bt2.destroy()
-        self.tela_login()
+        if self.cadastro:
+            self.primeiro = tk.Label(
+                self.tela_,
+                text="""Como não existem admins no sistema \n 
+                        Cadastre o principal"""
+            )
+            # self.login.place(relheight=0.1, relwidth=0.1)
+            self.primeiro.grid(column=1, row=0, padx=2, pady=2)
+        else:
+            self.primeiro = tk.Label(
+                self.tela_,
+                text="""Tela de Login"""
+            )
+            # self.login.place(relheight=0.1, relwidth=0.1)
+            self.primeiro.grid(column=1, row=0, padx=2, pady=2)
 
-    def enviar_cadastro(self):
-        if self.bt1_:
-            self.bt1.destroy()
-        self.bt2.destroy()
-        self.tela_login(True)
-
-    def tela_login(self, x=False):
-        self.x = x
         self.cpf = tk.Label(
             self.tela_,
             text="CPF:"
@@ -79,7 +80,7 @@ class Iniciar_sistema():
         self.senha_En = tk.Entry(self.tela_)
         self.senha_En.grid(column=2, row=2, padx=2, pady=2)
 
-        if not (self.x):
+        if not (self.cadastro):
             self.bt1 = tk.Button(self.tela_, text="Confirmar",
                                  command=self.validar_senha)
             self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
@@ -91,17 +92,22 @@ class Iniciar_sistema():
     def validar_senha(self):
         cpf = self.cpf_En.get()
         self.alter_cpf = cpf
+
+        if len(self.alter_cpf) < 11:
+            self.erro_de_login('CPF invalido')
+            return
+
         if (cpf[3] == '.' and cpf[7] == '.' and cpf[11] == '-'):
             self.alter_cpf = (cpf[0:3]+cpf[4:7] +
                               cpf[8:11]+cpf[12:14])  # 012.456.890-90
 
         self.user = Usuario(self.alter_cpf, self.senha_En.get())
 
-        if BD_Valida_admin(self.user) and len(self.alter_cpf) < 11:
+        if BD_Valida_admin(self.user):
             self.deleta_login()
             self.Menu_inicial.cria_Menu()
         else:
-            self.erro_de_login()
+            self.erro_de_login('Senha ou Login incorretos')
             return
 
     def cadastrar(self):
@@ -111,34 +117,37 @@ class Iniciar_sistema():
                           cpf[8:11]+cpf[12:14])
 
         if len(self.alter_cpf) < 11:
-            self.erro_de_login()
+            self.erro_de_login('CPF invalido')
             return
 
         print(self.alter_cpf)
         self.user = Usuario(self.alter_cpf, self.senha_En.get())
-        
+
         if BD_Valida_admin(self.user, True):
             print('CPF Já está Cadastrado')
-            self.erro_de_login('ou Já está Cadastrado')
-        
-        BD_export_Admin(self.user)
+            self.erro_de_login('CPF Já está Cadastrado')
 
-    def erro_de_login(self, texto):
-        if not (self.erro):
-            self.er_senha = tk.Label(
-                self.tela_,
-                text=f"""Senha ou CPF Incorreto {texto}
-                        Tente inserir com a pontuação 000.000.000-00
-                     """,
-                border=1,
-                background='grey',
-            )
-            self.er_senha.grid(
-                column=0, row=10,
-                padx=2, pady=2, columnspan=2,
-                sticky='WE'
-            )
-            self.erro = True
+        BD_export_Admin(self.user)
+        self.primeiro.destroy()
+        self.deleta_login()
+        self.tela_login()
+
+    def erro_de_login(self, texto='ERROR'):
+        if self.erro:
+            self.er_senha.destroy()
+
+        self.er_senha = tk.Label(
+            self.tela_,
+            text=f"""{texto}""",
+            border=1,
+            background='grey',
+        )
+        self.er_senha.grid(
+            column=10, row=1,
+            padx=2, pady=2,
+            sticky='WE'
+        )
+        self.erro = True
 
     def deleta_login(self):
         self.cpf.destroy()
@@ -148,7 +157,7 @@ class Iniciar_sistema():
         if self.erro:
             self.er_senha.destroy()
 
-        self.bt1.destroy() if not (self.x) else self.bt2.destroy()
+        self.bt1.destroy() if not (self.cadastro) else self.bt2.destroy()
 
 
 class Menu_inicial():
