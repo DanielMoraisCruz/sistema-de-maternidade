@@ -6,7 +6,7 @@ conexao = mysql.connector.connect(  # funcao que realiza a conexão
     host='localhost',   # passar o host, se o BD estiver no seu computador use
                         # local Host
     user='root',  # Usuario do BD
-    password='OlljFVAZlRVsdNiTncrS',  # Senha do BD
+    password='3650',  # Senha do BD
     database='maternidade',  # Nome do esquema que será alterado
 )
 
@@ -146,9 +146,17 @@ def BD_getInfo_bebe():
     return resultado
 
 
-def BD_getInfo_parto():
-    pass
+def BD_ConsutaDiaria(data:str):
+    comando = f'''SELECT CRM, medico.Nome, parto.CPF_mae, mae.Nome,mae.Dt_nasc,Sexo,bebe.Dt_nasc,Peso, Altura
+                 FROM maternidade.medico, maternidade.mae, maternidade.bebe, maternidade.parto WHERE 
+                 Dt_parto = "{data}" AND bebe.Cod_parto = parto.Cod_parto
+                 AND CRM_medico = CRM and parto.CPF_mae = CPF'''
+    cursor.execute(comando)
+    resultado = cursor.fetchall()
+    print(resultado)
+    return resultado
+    
+
+BD_ConsutaDiaria("20000102")
 
 
-user = Usuario("1234", "daniel")
-BD_Valida_admin(user)
