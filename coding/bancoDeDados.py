@@ -101,9 +101,14 @@ def BD_export_Admin(User: Usuario):
 #   ----VALIDAR INFORMAÇÕES---- #
 
 
-def BD_Valida_admin(user: Usuario):
-    comando = f'''SELECT cpf FROM maternidade.admins
-                  WHERE CPF = "{user.cpf}" AND senha = "{user.senha}"'''
+def BD_Valida_admin(user: Usuario, p_cpf=False):
+
+    if not (p_cpf):
+        comando = f'''SELECT cpf FROM maternidade.admins
+                      WHERE CPF = "{user.cpf}" AND senha = "{user.senha}"'''
+    else:
+        comando = f'''SELECT cpf FROM maternidade.admins
+                      WHERE CPF = "{user.cpf}"'''
     cursor.execute(comando)
     resultado = cursor.fetchall()  # ler o banco de dados
     print(resultado)
@@ -146,7 +151,7 @@ def BD_getInfo_bebe():
     return resultado
 
 
-def BD_ConsutaDiaria(data:str):
+def BD_ConsutaDiaria(data: str):
     comando = f'''SELECT CRM, medico.Nome, parto.CPF_mae, mae.Nome,mae.Dt_nasc,Sexo,bebe.Dt_nasc,Peso, Altura
                  FROM maternidade.medico, maternidade.mae, maternidade.bebe, maternidade.parto WHERE 
                  Dt_parto = "{data}" AND bebe.Cod_parto = parto.Cod_parto
@@ -155,8 +160,6 @@ def BD_ConsutaDiaria(data:str):
     resultado = cursor.fetchall()
     print(resultado)
     return resultado
-    
+
 
 BD_ConsutaDiaria("20000102")
-
-
