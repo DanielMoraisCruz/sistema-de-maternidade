@@ -1,18 +1,20 @@
 import mysql.connector
-from interface import Bebê, Menu_do_Parto, Mãe, Médico,Usuario
+from glopais import Bebê, Mãe, Médico, Usuario
 
 conexao = mysql.connector.connect(  # funcao que realiza a conexão
                                     # entre o programa e o BD
     host='localhost',   # passar o host, se o BD estiver no seu computador use
                         # local Host
     user='root',  # Usuario do BD
-    password='3650',  # Senha do BD
+    password='OlljFVAZlRVsdNiTncrS',  # Senha do BD
     database='maternidade',  # Nome do esquema que será alterado
 )
 
 cursor = conexao.cursor()
 
 #   ----INSERIR INFORMAÇÕES---- #
+
+
 def BD_export_Mae(mae: Mãe):
     comando = f'''INSERT INTO mae (Nome,CPF,Endereco,Telefone,Dt_nasc) VALUES (
                  "{mae.nome}",
@@ -67,7 +69,7 @@ def BD_export_medico(medico: Médico):
     conexao.commit()
 
 
-def BD_export_parto(parto: Menu_do_Parto):
+def BD_export_parto(parto):
     if parto.mãe.num_filhos > 1:
         comando = f'''INSERT INTO parto (CPF_mae, CRM_medico, COD_parto,
                       Data_parto, Gemeos, Num_Gemeos) VALUES (
@@ -88,7 +90,8 @@ def BD_export_parto(parto: Menu_do_Parto):
     cursor.execute(comando)
     conexao.commit()
 
-def BD_export_Admin(User:Usuario):
+
+def BD_export_Admin(User: Usuario):
     comando = f'''INSERT INTO admins(CPF,senha) VALUES (
                  "{User.cpf}",
                  "{User.senha}",)'''
@@ -97,42 +100,46 @@ def BD_export_Admin(User:Usuario):
 
 #   ----VALIDAR INFORMAÇÕES---- #
 
-def BD_Valida_admin(user:Usuario):
-    comando = f'SELECT cpf FROM maternidade.admins WHERE CPF = "{user.cpf}" AND senha = "{user.senha}"'
+
+def BD_Valida_admin(user: Usuario):
+    comando = f'''SELECT cpf FROM maternidade.admins
+                  WHERE CPF = "{user.cpf}" AND senha = "{user.senha}"'''
     cursor.execute(comando)
-    resultado = cursor.fetchall() # ler o banco de dados
+    resultado = cursor.fetchall()  # ler o banco de dados
     return (False if resultado == [] else True)
-   #if resultado == []:
-   #    print("usuario não existe")
-   #else:
-   #    print("usuario existe")
-    
+    # if resultado == []:
+    #    print("usuario não existe")
+    # else:
+    #    print("usuario existe")
+
 #   ----CONSULTAR INFORMAÇÕES---- #
 
+
 def BD_getInfo_adim():
-    comando = f'SELECT cpf FROM maternidade.admins'
+    comando = 'SELECT cpf FROM maternidade.admins'
     cursor.execute(comando)
-    resultado = cursor.fetchall() # ler o banco de dados
+    resultado = cursor.fetchall()  # ler o banco de dados
     print(resultado)
     return (False if resultado == [] else True)
 
+
 def BD_getInfo_mae():
-    comando = f'SELECT Nome,CPF,Dt_nasc FROM maternidade.mae'
+    comando = 'SELECT Nome,CPF,Dt_nasc FROM maternidade.mae'
     cursor.execute(comando)
     resultado = cursor.fetchall()
     return resultado
 
 
 def BD_getInfo_medico():
-    comando = f'SELECT CRM,Nome FROM maternidade.medico'
+    comando = 'SELECT CRM,Nome FROM maternidade.medico'
     cursor.execute(comando)
-    resultado = cursor.fetchall() # ler o banco de dados
+    resultado = cursor.fetchall()  # ler o banco de dados
     print(resultado)
     return resultado
 
 
 def BD_getInfo_bebe():
-    comando = f'SELECT Nome,Sexo,Dt_nasc,Peso,Altura FROM maternidade.bebe'
+    comando = 'SELECT Nome,Sexo,Dt_nasc,Peso,Altura FROM maternidade.bebe'
     cursor.execute(comando)
     resultado = cursor.fetchall()
     return resultado
@@ -142,5 +149,5 @@ def BD_getInfo_parto():
     pass
 
 
-user = Usuario("1234","daniel")
+user = Usuario("1234", "daniel")
 BD_Valida_admin(user)

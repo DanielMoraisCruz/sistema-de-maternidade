@@ -2,6 +2,7 @@ import tkinter as tk
 
 from bancoDeDados import BD_export_Admin, BD_getInfo_adim, BD_Valida_admin
 from codigos_externos import validate
+from glopais import Bebê, Mãe, Médico, Usuario
 
 
 class Iniciar_sistema():
@@ -88,8 +89,8 @@ class Iniciar_sistema():
             self.bt2.grid(column=2, row=3, padx=2, pady=2, columnspan=2)
 
     def validar_senha(self):
-        user = Usuario(self.cpf_En.get(), self.senha_En.get())
-        if BD_Valida_admin(user):
+        self.user = Usuario(self.cpf_En.get(), self.senha_En.get())
+        if BD_Valida_admin(self.user):
             self.deleta_login()
             self.Menu_inicial.cria_Menu()
         else:
@@ -97,9 +98,9 @@ class Iniciar_sistema():
             return
 
     def cadastrar(self):
-        user = Usuario(self.cpf_En.get(), self.senha_En.get())
-        if validate(user.cpf):
-            BD_export_Admin(user)
+        self.user = Usuario(self.cpf_En.get(), self.senha_En.get())
+        if validate(self.user.cpf):
+            BD_export_Admin(self.user)
         else:
             print("CPF: não válido, insira como 000.000.000-00")
 
@@ -175,21 +176,26 @@ class Menu_inicial():
         pass
 
 
+class Parto():
+    def __init__(self) -> None:
+        self.mãe: Mãe
+        self.médico: Médico
+        self.cod_parto: int
+
+
 class Menu_do_Parto():
     def __init__(self, base: Iniciar_sistema) -> None:
         self.base = base
+        self.parto: Parto = Parto()
 
         self.status_mãe: bool = False
+
         self.erro_mostrado_1: bool = False
         self.erro_mostrado_2: bool = False
-        self.enviado: bool = False
-
-        self.mãe: Mãe
-        self.médico: Médico
 
         self.val_erro: bool = True
 
-        self.cod_parto: int
+        self.enviado: bool = False
 
     def cria_Parto(self):
 
@@ -198,8 +204,8 @@ class Menu_do_Parto():
         self.erro_mostrado_2 = False
         self.enviado = False
 
-        self.mãe = Mãe()
-        self.médico = Médico()
+        self.parto.mãe = Mãe()
+        self.parto.médico = Médico()
         self.base.Menu_inicial.fechar_Menu()
 
         # Informações do Médico
@@ -471,24 +477,24 @@ class Menu_do_Parto():
             self.inserir_bebês()
 
     def inserir_bebês(self):
-        bebe_temp = Bebê(self)
+        bebe_temp = Menu_do_Bebê(self)
         bebe_temp.cadastrar_bebê()
 
     def enviar(self):
-        self.mãe.cpf = self.cpf.get()
+        self.parto.mãe.cpf = self.cpf.get()
 
         if not (self.valida):
-            self.mãe.nome = self.nome_mãe.get()
-            self.mãe.endereço = self.endereço.get()
-            self.mãe.telefone = self.telefone.get()
-            self.mãe.data_nasci = self.data_n.get()
+            self.parto.mãe.nome = self.nome_mãe.get()
+            self.parto.mãe.endereço = self.endereço.get()
+            self.parto.mãe.telefone = self.telefone.get()
+            self.parto.mãe.data_nasci = self.data_n.get()
         else:
-            self.mãe.nome = 'default'
-            self.mãe.endereço = 'default'
-            self.mãe.telefone = 'default'
-            self.mãe.data_nasci = '00-00-00'
+            self.parto.mãe.nome = 'default'
+            self.parto.mãe.endereço = 'default'
+            self.parto.mãe.telefone = 'default'
+            self.parto.mãe.data_nasci = '00-00-00'
 
-        self.mãe.num_filhos = int(self.número_rn.get())
+        self.parto.mãe.num_filhos = int(self.número_rn.get())
 
         # ----  ENVIAR MÃE  ---- #
 
@@ -633,21 +639,15 @@ class Menu_do_Médico():
                 self.val_erro = False
 
 
-class Bebê():
+class Menu_do_Bebê():
     def __init__(self, parto: Menu_do_Parto) -> None:
         self.parto: Menu_do_Parto = parto
         self.base: Iniciar_sistema = self.parto.base
-        self.nome: str = ''
-        self.sexo: str = ''
-        self.peso: float = 0.0
-        self.altura: float = 0.0
-        self.data_nasci: str = ''
-        self.hora_nasci: str = ''
-        self.sobrevive: bool = True
-        self.prematuro: bool = False
 
-        self.médico: Médico = self.parto.médico
-        self.mãe: Mãe = self.parto.mãe
+        self.médico: Médico = self.parto.parto.médico
+        self.mãe: Mãe = self.parto.parto.mãe
+
+        self.bebê: Bebê = Bebê(self.mãe, self.médico, self.parto)
         self.numero_do_bebe: int = 1
 
         self.voltando = False
@@ -921,30 +921,6 @@ class Bebê():
         # ---- ENVIAR BEBE ---- #
 
         self.fechar_bebê()
-
-
-class Mãe():
-    def __init__(self) -> None:
-        self.cpf: str = ''
-        self.nome: str = ''
-        self.endereço: str = ''
-        self.telefone: str = ''
-        self.data_nasci: str = ''
-        self.num_filhos: int = 0
-        self.lista_filhos: list = []
-
-
-class Médico():
-    def __init__(self, crm='', espec='', nome='') -> None:
-        self.crm: str = crm
-        self.espec: str = espec
-        self.nome: str = nome
-
-
-class Usuario():
-    def __init__(self, cpf: str, senha: str) -> None:
-        self.cpf: str = cpf
-        self.senha: str = senha
 
 
 Iniciar_sistema()
