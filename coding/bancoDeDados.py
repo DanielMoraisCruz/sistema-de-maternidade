@@ -12,7 +12,7 @@ conexao = mysql.connector.connect(  # funcao que realiza a conexão
 
 cursor = conexao.cursor()
 
-
+#   ----INSERIR INFORMAÇÕES---- #
 def BD_export_Mae(mae: Mãe):
     comando = f'''INSERT INTO mae (Nome,CPF,Endereco,Telefone,Dt_nasc) VALUES (
                  "{mae.nome}",
@@ -95,12 +95,7 @@ def BD_export_Admin(User:Usuario):
     cursor.execute(comando)
     conexao.commit()
 
-def BD_getInfo_adim():
-    comando = f'SELECT cpf FROM maternidade.admins'
-    cursor.execute(comando)
-    resultado = cursor.fetchall() # ler o banco de dados
-    print(resultado)
-    return (False if resultado == [] else True)
+#   ----VALIDAR INFORMAÇÕES---- #
 
 def BD_Valida_admin(user:Usuario):
     comando = f'SELECT cpf FROM maternidade.admins WHERE CPF = "{user.cpf}" AND senha = "{user.senha}"'
@@ -112,9 +107,20 @@ def BD_Valida_admin(user:Usuario):
    #else:
    #    print("usuario existe")
     
+#   ----CONSULTAR INFORMAÇÕES---- #
+
+def BD_getInfo_adim():
+    comando = f'SELECT cpf FROM maternidade.admins'
+    cursor.execute(comando)
+    resultado = cursor.fetchall() # ler o banco de dados
+    print(resultado)
+    return (False if resultado == [] else True)
 
 def BD_getInfo_mae():
-    pass
+    comando = f'SELECT Nome,CPF,Dt_nasc FROM maternidade.mae'
+    cursor.execute(comando)
+    resultado = cursor.fetchall()
+    return resultado
 
 
 def BD_getInfo_medico():
@@ -122,10 +128,14 @@ def BD_getInfo_medico():
     cursor.execute(comando)
     resultado = cursor.fetchall() # ler o banco de dados
     print(resultado)
+    return resultado
 
 
 def BD_getInfo_bebe():
-    pass
+    comando = f'SELECT Nome,Sexo,Dt_nasc,Peso,Altura FROM maternidade.bebe'
+    cursor.execute(comando)
+    resultado = cursor.fetchall()
+    return resultado
 
 
 def BD_getInfo_parto():
