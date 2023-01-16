@@ -1,6 +1,4 @@
 import tkinter as tk
-import mysql.connector
-
 
 
 class Iniciar_sistema():
@@ -374,6 +372,7 @@ class Menu_do_Parto():
 
     def voltar(self):
         self.enviado = False
+        self.val_erro = False
         self.fechar_Parto()
 
     def fechar_Parto(self):
@@ -468,6 +467,7 @@ class Menu_do_Médico():
     def __init__(self, base: Iniciar_sistema) -> None:
         self.base = base
         self.lista_médicos: list = []
+        self.val_erro: bool = True
 
     def cria_Médico(self):
         self.base.Menu_inicial.fechar_Menu()
@@ -591,7 +591,7 @@ class Menu_do_Médico():
         else:
             # Mostra erro
             if self.val_erro:  # val_error está disponível?
-                print("Error - Numero de Recém Nascidos INVALIDO")
+                print("Error - Nenhum valor inserido")
                 self.error_message = tk.Label(
                     self.base.tela_,
                     text='Error - Numero de Recém Nascidos INVALIDO'
@@ -885,7 +885,7 @@ class Bebê():
 
         self.mãe.lista_filhos.append(self)
 
-        # ---- ENVIAR BEEB ---- #
+        # ---- ENVIAR BEBE ---- #
 
         self.fechar_bebê()
 
@@ -906,29 +906,6 @@ class Médico():
         self.crm: str = crm
         self.espec: str = espec
         self.nome: str = nome
-
-
-def enviar_dado_bebê(bebe: Bebê):
-    print(f"""
-    Estas informações devem ser enviadas para o Banco
-    Nome do bebê: {bebe.nome}
-    Sexo do bebê: {bebe.sexo}
-    Peso do bebê: {bebe.peso}
-    Altura do bebê: {bebe.altura}
-    Data de Nascimento do bebê: {bebe.data_nasci}
-    Horário de Nascimento do bebê: {bebe.hora_nasci}
-    Prematuro? {bebe.prematuro}
-    Sobreviveu? {bebe.sobrevive}
-    CPF da Mãe: {bebe.mãe.cpf}
-    """)
-
-
-def enviar_dado_mãe(mãe: Mãe):
-    print(mãe.nome)
-
-
-def enviar_dado_médico(médico: Médico):
-    print(médico.nome)
 
 
 Iniciar_sistema()
