@@ -1,5 +1,7 @@
 import tkinter as tk
 
+from bancoDeDados import BD_getInfo_Admin
+
 
 class Iniciar_sistema():
     def __init__(self) -> None:
@@ -10,11 +12,9 @@ class Iniciar_sistema():
         self.Parto = Menu_do_Parto(self)
         self.Médicos = Menu_do_Médico(self)
 
-        self.login_test = ""
-        self.senha_test = ""
         self.erro = False
 
-        self.tela_login()
+        self.escolha_inicial()
         self.root.mainloop()
 
     def tela(self):
@@ -33,18 +33,36 @@ class Iniciar_sistema():
         self.tab_2 = tk.Label(self.tela_)
         self.tab_2.grid(column=0, row=0, padx=2, pady=2)
 
-    def tela_login(self):
+    def escolha_inicial(self):
+        self.bt1 = tk.Button(self.tela_, text="Fazer Login",
+                             command=self.enviar_login)
+        self.bt1.grid(column=1, row=1, padx=2, pady=2, columnspan=2)
 
-        self.login = tk.Label(
+        self.bt2 = tk.Button(self.tela_, text="Cadastrar",
+                             command=self.enviar_cadastro)
+        self.bt2.grid(column=2, row=1, padx=2, pady=2, columnspan=2)
+
+    def enviar_login(self):
+        self.bt1.destroy()
+        self.bt2.destroy()
+        self.tela_login()
+
+    def enviar_cadastro(self):
+        self.bt1.destroy()
+        self.bt2.destroy()
+        self.tela_login(True)
+
+    def tela_login(self, x=False):
+        self.cpf = tk.Label(
             self.tela_,
-            text="Login:"
+            text="CPF:"
         )
         # self.login.place(relheight=0.1, relwidth=0.1)
-        self.login.grid(column=1, row=1, padx=2, pady=2)
+        self.cpf.grid(column=1, row=1, padx=2, pady=2)
 
-        self.login_En = tk.Entry(self.tela_)
+        self.cpf_En = tk.Entry(self.tela_)
         # self.login_En.place(relheight=0.01, relwidth=0.1)
-        self.login_En.grid(column=2, row=1, padx=2, pady=2)
+        self.cpf_En.grid(column=2, row=1, padx=2, pady=2)
 
         self.senha = tk.Label(
             self.tela_,
@@ -60,15 +78,18 @@ class Iniciar_sistema():
         self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
 
     def validar_senha(self):
-        login_valido = self.login_En.get() == self.login_test
-        senha_valida = self.senha_En.get() == self.senha_test
-
-        if login_valido and senha_valida:
-            self.deleta_login()
-            self.Menu_inicial.cria_Menu()
-        else:
-            self.erro_de_login()
+        if not (BD_getInfo_Admin()):
             return
+        else:
+            user = Usuario(self.cpf_En.get(), self.senha_En.get())
+            
+
+            # if True:
+            #     self.deleta_login()
+            #     self.Menu_inicial.cria_Menu()
+            # else:
+            #     self.erro_de_login()
+            #     return
 
     def erro_de_login(self):
         if not (self.erro):
@@ -86,9 +107,9 @@ class Iniciar_sistema():
             self.erro = True
 
     def deleta_login(self):
-        self.login.destroy()
+        self.cpf.destroy()
         self.senha.destroy()
-        self.login_En.destroy()
+        self.cpf_En.destroy()
         self.senha_En.destroy()
         if self.erro:
             self.er_senha.destroy()
