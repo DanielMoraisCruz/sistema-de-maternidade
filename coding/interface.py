@@ -2,7 +2,6 @@ import tkinter as tk
 
 from bancoDeDados import BD_export_Admin, BD_getInfo_adim, BD_Valida_admin
 from classes import Bebê, Mãe, Médico, Parto, Usuario
-from codigos_externos import validate
 
 
 class Iniciar_sistema():
@@ -40,12 +39,12 @@ class Iniciar_sistema():
         if BD_getInfo_adim():
             self.bt1 = tk.Button(self.tela_, text="Fazer Login",
                                  command=self.enviar_login)
-            self.bt1.grid(column=1, row=1, padx=2, pady=2, columnspan=2)
+            self.bt1.grid(column=1, row=1, padx=2, pady=2)
             self.bt1_ = True
 
         self.bt2 = tk.Button(self.tela_, text="Cadastrar",
                              command=self.enviar_cadastro)
-        self.bt2.grid(column=2, row=1, padx=2, pady=2, columnspan=2)
+        self.bt2.grid(column=2, row=1, padx=2, pady=2)
 
     def enviar_login(self):
         self.bt1.destroy()
@@ -59,6 +58,7 @@ class Iniciar_sistema():
         self.tela_login(True)
 
     def tela_login(self, x=False):
+        self.x = x
         self.cpf = tk.Label(
             self.tela_,
             text="CPF:"
@@ -79,7 +79,7 @@ class Iniciar_sistema():
         self.senha_En = tk.Entry(self.tela_)
         self.senha_En.grid(column=2, row=2, padx=2, pady=2)
 
-        if not (x):
+        if not (self.x):
             self.bt1 = tk.Button(self.tela_, text="Confirmar",
                                  command=self.validar_senha)
             self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
@@ -89,35 +89,25 @@ class Iniciar_sistema():
             self.bt2.grid(column=2, row=3, padx=2, pady=2, columnspan=2)
 
     def validar_senha(self):
-        if validate(self.cpf_En.get()):
-            self.cpf = self.cpf_En.get()
-            self.alter_cpf = (self.cpf[0:3]+self.cpf[4:7] +
-                              self.cpf[8:11]+self.cpf[12:14])
+        cpf = self.cpf_En.get()
+        self.alter_cpf = (cpf[0:3]+cpf[4:7] +
+                          cpf[8:11]+cpf[12:14])
 
-            self.user = Usuario(self.alter_cpf, self.senha_En.get())
-            if BD_Valida_admin(self.user):
-                self.deleta_login()
-                self.Menu_inicial.cria_Menu()
-            else:
-                self.erro_de_login()
-                return
+        self.user = Usuario(self.alter_cpf, self.senha_En.get())
+        if BD_Valida_admin(self.user):
+            self.deleta_login()
+            self.Menu_inicial.cria_Menu()
         else:
-            print("CPF: não válido, insira como 000.000.000-00")
             self.erro_de_login()
             return
 
     def cadastrar(self):
-        if validate(self.cpf_En.get()):
-            self.cpf = self.cpf_En.get()
-            self.alter_cpf = (self.cpf[0:3]+self.cpf[4:7] +
-                              self.cpf[8:11]+self.cpf[12:14])
-            print(self.alter_cpf)
-            self.user = Usuario(self.alter_cpf, self.senha_En.get())
-            BD_export_Admin(self.user)
-        else:
-            print("CPF: não válido, insira como 000.000.000-00")
-            self.erro_de_login()
-            return
+        cpf = self.cpf_En.get()
+        self.alter_cpf = (cpf[0:3]+cpf[4:7] +
+                          cpf[8:11]+cpf[12:14])
+        print(self.alter_cpf)
+        self.user = Usuario(self.alter_cpf, self.senha_En.get())
+        BD_export_Admin(self.user)
 
     def erro_de_login(self):
         if not (self.erro):
@@ -142,7 +132,8 @@ class Iniciar_sistema():
         self.senha_En.destroy()
         if self.erro:
             self.er_senha.destroy()
-        self.bt1.destroy()
+
+        self.bt1.destroy() if not (self.x) else self.bt2.destroy()
 
 
 class Menu_inicial():
