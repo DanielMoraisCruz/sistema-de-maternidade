@@ -1,6 +1,7 @@
 import tkinter as tk
 
-from bancoDeDados import BD_export_Admin, BD_getInfo_adim, BD_Valida_admin
+from bancoDeDados import (BD_export_Admin, BD_getInfo_adim, BD_getInfo_medico,
+                          BD_Valida_admin)
 from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 
@@ -47,7 +48,7 @@ class Iniciar_sistema():
         if self.cadastro:
             self.primeiro = tk.Label(
                 self.tela_,
-                text="""Como não existem admins no sistema \n 
+                text="""Como não existem admins no sistema \n
                         Cadastre o principal"""
             )
             # self.login.place(relheight=0.1, relwidth=0.1)
@@ -112,25 +113,24 @@ class Iniciar_sistema():
 
     def cadastrar(self):
         cpf = self.cpf_En.get()
+        self.alter_cpf = cpf
+        if (cpf[3] == '.' and cpf[7] == '.' and cpf[11] == '-'):
+            self.alter_cpf = (cpf[0:3]+cpf[4:7]+cpf[8:11]+cpf[12:14])
 
-        self.alter_cpf = (cpf[0:3]+cpf[4:7] +
-                          cpf[8:11]+cpf[12:14])
-
-        if len(self.alter_cpf) < 11:
+        valida = len(self.alter_cpf) < 11
+        if valida:
             self.erro_de_login('CPF invalido')
-            return
+        else:
+            print(self.alter_cpf)
+            self.user = Usuario(self.alter_cpf, self.senha_En.get())
 
-        print(self.alter_cpf)
-        self.user = Usuario(self.alter_cpf, self.senha_En.get())
+            if BD_Valida_admin(self.user, True):
+                print('CPF Já está Cadastrado')
+                self.erro_de_login('CPF Já está Cadastrado')
 
-        if BD_Valida_admin(self.user, True):
-            print('CPF Já está Cadastrado')
-            self.erro_de_login('CPF Já está Cadastrado')
-
-        BD_export_Admin(self.user)
-        self.primeiro.destroy()
-        self.deleta_login()
-        self.tela_login()
+            BD_export_Admin(self.user)
+            self.deleta_login()
+            self.tela_login()
 
     def erro_de_login(self, texto='ERROR'):
         if self.erro:
@@ -150,6 +150,7 @@ class Iniciar_sistema():
         self.erro = True
 
     def deleta_login(self):
+        self.primeiro.destroy()
         self.cpf.destroy()
         self.senha.destroy()
         self.cpf_En.destroy()
@@ -175,12 +176,20 @@ class Menu_inicial():
             sticky='W'
         )
 
-        self.bt_parto = tk.Button(
-            self.base.tela_,
-            text="Cadastrar Parto",
-            command=self.base.Parto.cria_Parto
-        )
-        self.bt_parto.grid(column=2, row=1, padx=0.5, pady=0.5)
+        if not (BD_getInfo_medico()):
+            self.bt_parto = tk.Button(
+                self.base.tela_,
+                text="Cadastrar Parto",
+                state=tk.DISABLED
+            )
+            self.bt_parto.grid(column=2, row=1, padx=0.5, pady=0.5)
+        else:
+            self.bt_parto = tk.Button(
+                self.base.tela_,
+                text="Cadastrar Parto",
+                command=self.base.Parto.cria_Parto
+            )
+            self.bt_parto.grid(column=2, row=1, padx=0.5, pady=0.5)
 
         self.bt_médico = tk.Button(
             self.base.tela_,
@@ -193,18 +202,6 @@ class Menu_inicial():
         self.intro.destroy()
         self.bt_parto.destroy()
         self.bt_médico.destroy()
-
-    def receber_info_mãe(self):
-        # ----  PEGAR INFOS DE MÃE  ---- #
-        pass
-
-    def receber_info_médico(self):
-        # ----  PEGAR INFOS DE MÉDICO  ---- #
-        pass
-
-    def receber_info_bebê(self):
-        # ----  PEGAR INFOS DE BEBÊ  ---- #
-        pass
 
 
 class Menu_do_Parto():

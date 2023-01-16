@@ -93,8 +93,8 @@ def BD_export_parto(parto: Parto):
 
 def BD_export_Admin(User: Usuario):
     comando = f'''INSERT INTO admins(CPF,senha) VALUES (
-                 "{User.cpf}",
-                 "{User.senha}",)'''
+                  "{User.cpf}",
+                  "{User.senha}")'''
     cursor.execute(comando)
     conexao.commit()
 
@@ -115,7 +115,7 @@ def BD_Valida_admin(user: Usuario, p_cpf=False):
     return (False if resultado == [] else True)
 
 
-def BD_Valida_CPF_Mae(mae: Mãe, p_cpf=False):
+def BD_Valida_CPF_Mae(mae: Mãe):
     comando = f'''SELECT CPF FROM maternidade.mae
                   WHERE CPF = "{mae.cpf}"'''
     cursor.execute(comando)
@@ -155,7 +155,7 @@ def BD_getInfo_medico():
     cursor.execute(comando)
     resultado = cursor.fetchall()  # ler o banco de dados
     print(resultado)
-    return resultado
+    return (False if resultado == [] else True)
 
 
 def BD_getInfo_bebe():
