@@ -53,8 +53,7 @@ def BD_export_Bb(bb: Bebê):
                   "{bb.parto.cod_parto}",
                   "{gemeo}",
                   "{prematuro}",
-                  "{sobreviveu}",
-                  '''
+                  "{sobreviveu}",)'''
     cursor.execute(comando)
     conexao.commit()
 
@@ -77,7 +76,7 @@ def BD_export_parto(parto: Menu_do_Parto):
                       "{parto.cod_parto}",
                       "{parto.data_n}",
                       "{'S'}",
-                      "{parto.mãe.num_filhos}",'''
+                      "{parto.mãe.num_filhos}",)'''
     else:
         comando = f'''INSERT INTO parto (CPF_mae, CRM_medico, COD_parto,
                       Data_parto, Gemeos) VALUES (
@@ -85,10 +84,16 @@ def BD_export_parto(parto: Menu_do_Parto):
                       "{parto.médico.crm}",
                       "{parto.cod_parto}",
                       "{parto.data_n}",
-                      "{'N'}",'''
+                      "{'N'}",)'''
     cursor.execute(comando)
     conexao.commit()
 
+def BD_export_Admin(User:Usuario):
+    comando = f'''INSERT INTO admins(CPF,senha) VALUES (
+                 "{User.cpf}",
+                 "{User.senha}",)'''
+    cursor.execute(comando)
+    conexao.commit()
 
 def BD_getInfo_mae():
     pass
