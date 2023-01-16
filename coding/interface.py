@@ -1,6 +1,7 @@
 import tkinter as tk
 
-from bancoDeDados import BD_getInfo_Admin
+from bancoDeDados import BD_export_Admin, BD_getInfo_adim, BD_Valida_admin
+from codigos_externos import validate
 
 
 class Iniciar_sistema():
@@ -13,6 +14,7 @@ class Iniciar_sistema():
         self.Médicos = Menu_do_Médico(self)
 
         self.erro = False
+        self.bt1_ = False
 
         self.escolha_inicial()
         self.root.mainloop()
@@ -34,9 +36,11 @@ class Iniciar_sistema():
         self.tab_2.grid(column=0, row=0, padx=2, pady=2)
 
     def escolha_inicial(self):
-        self.bt1 = tk.Button(self.tela_, text="Fazer Login",
-                             command=self.enviar_login)
-        self.bt1.grid(column=1, row=1, padx=2, pady=2, columnspan=2)
+        if BD_getInfo_adim():
+            self.bt1 = tk.Button(self.tela_, text="Fazer Login",
+                                 command=self.enviar_login)
+            self.bt1.grid(column=1, row=1, padx=2, pady=2, columnspan=2)
+            self.bt1_ = True
 
         self.bt2 = tk.Button(self.tela_, text="Cadastrar",
                              command=self.enviar_cadastro)
@@ -48,7 +52,8 @@ class Iniciar_sistema():
         self.tela_login()
 
     def enviar_cadastro(self):
-        self.bt1.destroy()
+        if self.bt1_:
+            self.bt1.destroy()
         self.bt2.destroy()
         self.tela_login(True)
 
@@ -73,23 +78,30 @@ class Iniciar_sistema():
         self.senha_En = tk.Entry(self.tela_)
         self.senha_En.grid(column=2, row=2, padx=2, pady=2)
 
-        self.bt1 = tk.Button(self.tela_, text="Confirmar",
-                             command=self.validar_senha)
-        self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
+        if x:
+            self.bt1 = tk.Button(self.tela_, text="Confirmar",
+                                 command=self.validar_senha)
+            self.bt1.grid(column=1, row=3, padx=2, pady=2, columnspan=2)
+        else:
+            self.bt2 = tk.Button(self.tela_, text="Cadastrar",
+                                 command=self.cadastrar)
+            self.bt2.grid(column=2, row=3, padx=2, pady=2, columnspan=2)
 
     def validar_senha(self):
-        if not (BD_getInfo_Admin()):
-            return
+        user = Usuario(self.cpf_En.get(), self.senha_En.get())
+        if BD_Valida_admin(user):
+            self.deleta_login()
+            self.Menu_inicial.cria_Menu()
         else:
-            user = Usuario(self.cpf_En.get(), self.senha_En.get())
-            
+            self.erro_de_login()
+            return
 
-            # if True:
-            #     self.deleta_login()
-            #     self.Menu_inicial.cria_Menu()
-            # else:
-            #     self.erro_de_login()
-            #     return
+    def cadastrar(self):
+        user = Usuario(self.cpf_En.get(), self.senha_En.get())
+        if validate(user.cpf):
+            BD_export_Admin(user)
+        else:
+            print("CPF: não válido, insira como 000.000.000-00")
 
     def erro_de_login(self):
         if not (self.erro):
