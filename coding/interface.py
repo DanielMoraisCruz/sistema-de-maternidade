@@ -1,9 +1,10 @@
 import re
 import tkinter as tk
 
-from bancoDeDados import (BD_export_Admin, BD_export_Mae, BD_export_medico,
-                          BD_getInfo_adim, BD_getInfo_medico, BD_Valida_admin,
-                          BD_Valida_CPF_Mae)
+from bancoDeDados import (BD_export_Admin, BD_export_Bb, BD_export_Mae,
+                          BD_export_medico, BD_export_parto, BD_getInfo_adim,
+                          BD_getInfo_medico, BD_Valida_admin,
+                          BD_Valida_CPF_Mae, BD_Valida_CRM_Medico)
 from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 
@@ -129,6 +130,7 @@ class Iniciar_sistema():
             if BD_Valida_admin(self.user, True):
                 print('CPF Já está Cadastrado')
                 self.erro_de_login('CPF Já está Cadastrado')
+                return
 
             BD_export_Admin(self.user)
             self.deleta_login()
@@ -222,8 +224,6 @@ class Menu_do_Parto():
     def cria_Parto(self):
 
         self.status_mãe = False
-        self.erro_mostrado_1 = False
-        self.erro_mostrado_2 = False
         self.enviado = False
 
         self.parto.mãe = Mãe()
@@ -266,14 +266,14 @@ class Menu_do_Parto():
         self.var_0 = tk.Radiobutton(
             self.base.tela_,
             text='Sim',
-            variable=self.valida.get(),
+            variable=self.valida,
             value=True,
             command=self.deleta_cadastrar_mãe
         )
         self.var_1 = tk.Radiobutton(
             self.base.tela_,
             text='Não',
-            variable=self.valida.get(),
+            variable=self.valida,
             value=False,
             command=self.cadastrar_mãe
         )
@@ -498,6 +498,12 @@ class Menu_do_Parto():
         bebe_temp.cadastrar_bebê()
 
     def enviar(self):
+        self.enviado = True
+
+        temp_med = Médico(crm=self.caixa_crm.get())
+        if not (BD_Valida_CRM_Medico(temp_med)):
+            self.error_("Médico não encontrado", 5, 1)
+
         cpf = self.cpf.get()
         self.alter_cpf = cpf
 
@@ -510,25 +516,35 @@ class Menu_do_Parto():
                               cpf[8:11]+cpf[12:14])  # 012.456.890-90
 
         self.parto.mãe.cpf = self.alter_cpf
-        self.enviado = True
 
-        if (not (re.match(r'\d{2}/\d{2}/\d{4}', self.data_n.get())) and
-                self.valida.get()):
-            self.error_("Data Incorreta, tente dd/mm/aaaa", 5, 3)
-            return
-        else:
+        if not (self.valida.get()):
+            if self.nome_mãe.get() == '' or self.data_n.get() == '':
+                self.error_(
+                    "Preencha os campos Nome e Data de Nascimento", 5, 3)
+                return
+
+            if not (re.match(r'\d{2}/\d{2}/\d{4}', self.data_n.get())):
+                self.error_("Data Incorreta, tente dd/mm/aaaa", 5, 3)
+                return
+
             temp_data = self.data_n.get()
             if int(temp_data[:2]) > 31 or int(temp_data[3:5]) > 12:
                 self.error_("Data Incorreta, tente dd/mm/aaaa", 5, 3)
                 return
-            data_n = temp_data[6:] + "-" + temp_data[3:5] + "-" + temp_data[:2]
+            data_n = temp_data[6:] + "-" + \
+                temp_data[3:5] + "-" + temp_data[:2]
 
-        if not (self.valida.get()):
             self.parto.mãe.nome = self.nome_mãe.get()
             self.parto.mãe.endereço = self.endereço.get()
             self.parto.mãe.telefone = self.telefone.get()
             print(data_n)
             self.parto.mãe.data_nasci = data_n
+
+            try:
+                int(self.número_rn.get())
+            except ValueError:
+                self.error_("Número de Filhos invalido", 5, 10)
+                return
 
             self.parto.mãe.num_filhos = int(self.número_rn.get())
 
@@ -657,16 +673,16 @@ class Menu_do_Médico():
         self.fechar_Médico()
 
     def valida_CRM(self, CRM: str):
-        if CRM[5:7] == '' or CRM[7:] == '' or len(CRM) != 12:
+        if CRM[4:6] == '' or CRM[6:] == '' or len(CRM) != 12:
             return False
 
-        print(CRM[7:])
+        print(CRM[6:])
         try:
-            int(CRM[7:])
+            int(CRM[6:])
         except ValueError:
             return False
 
-        print(CRM[5:7])
+        print(CRM[4:6])
         try:
             if int(CRM[5:7]):
                 return False
@@ -676,32 +692,34 @@ class Menu_do_Médico():
         return True
 
     def enviar(self):
-        tem_erro = False
         crm = "CRM/" + self.sigla.get() + self.digitos.get()
 
         if ((self.sigla.get() == '') and (self.espec.get() == '') and
                 (self.med_nome.get() == '')):
             self.error_("Nenhum valor inserido", 5, 10)
-            tem_erro = True
+            return
         if not (self.valida_CRM(crm)):
             self.error_("Crm incorreto", 5, 2)
-            tem_erro = True
+            return
         if self.med_nome.get() == '':
             self.error_("insira um nome ao médico", 5, 4)
-            tem_erro = True
+            return
 
-        if not (tem_erro):
-            self.medico_ = Médico(
-                crm=crm,
-                espec=self.espec.get(),
-                nome=self.med_nome.get()
-            )
+        self.medico_ = Médico(
+            crm=crm,
+            espec=self.espec.get(),
+            nome=self.med_nome.get()
+        )
 
-            self.error_("Médico inserido com SUCESSO", 5, 10)
+        if BD_Valida_CRM_Medico(self.medico_):
+            self.error_("Médico já cadastrado", 5, 10)
+            return
 
-            BD_export_medico(self.medico_)
+        self.error_("Médico inserido com SUCESSO", 5, 10)
 
-            self.fechar_Médico(True)
+        BD_export_medico(self.medico_)
+
+        self.fechar_Médico(True)
 
     def error_(self, texto: str, x=10, y=10):
         self.error_message: tk.Label
@@ -720,18 +738,19 @@ class Menu_do_Médico():
 
 
 class Menu_do_Bebê():
-    def __init__(self, parto: Menu_do_Parto) -> None:
-        self.parto: Menu_do_Parto = parto
-        self.base: Iniciar_sistema = self.parto.base
+    def __init__(self, menu_parto: Menu_do_Parto) -> None:
+        self.menu_parto = menu_parto
+        self.parto: Parto = self.menu_parto.parto
+        self.base: Iniciar_sistema = self.menu_parto.base
 
-        self.médico: Médico = self.parto.parto.médico
-        self.mãe: Mãe = self.parto.parto.mãe
+        self.médico: Médico = self.parto.médico
+        self.mãe: Mãe = self.parto.mãe
 
-        self.bebê: Bebê = Bebê(self.mãe, self.médico, self.parto)
         self.numero_do_bebe: int = 1
 
+        self.error_message: tk.Label
         self.voltando = False
-        self.mensagem_erro = False
+        self.val_erro = False
 
     def cadastrar_bebê(self):
 
@@ -971,36 +990,92 @@ class Menu_do_Bebê():
         self.var_sobreviveu_1.destroy()
         self.bt_voltar_parto.destroy()
         self.bt_enviar.destroy()
-        if self.mensagem_erro:
-            self.mensagem_erro = False
-            self.error_message_1.destroy()
+        if self.val_erro:
+            self.val_erro = False
+            self.error_message.destroy()
 
         self.ver = len(self.mãe.lista_filhos) < int(self.mãe.num_filhos)
         if self.ver and not (self.voltando):
-            self.parto.inserir_bebês()
+            self.menu_parto.inserir_bebês()
         else:
-            self.parto.cria_Parto()
+            self.menu_parto.cria_Parto()
 
     def enviar(self):
         if (self.nome_bebê.get() == '' or self.sexo_bebe.get() == '' or
             self.peso_bebê.get() == '' or self.altura_bebê.get() == '' or
             self.data_bebê.get() == '' or self.hora_bebê.get() == '' or
                 self.pre_bebê.get() == '' or self.sob_bebê.get() == ''):
-            print("Error - Preencha todos os campos")
-            if not (self.mensagem_erro):
-                self.error_message_1 = tk.Label(
-                    self.base.tela_,
-                    text='Error - Preencha todos os campos'
-                )
-                self.error_message_1.grid(column=5, row=10, sticky='E')
-                self.mensagem_erro = True
+            self.error_("Preencha todos os campos")
             return
 
-        self.mãe.lista_filhos.append(self)
+        if not (re.match(r'\d{2}/\d{2}/\d{4}', self.data_bebê.get())):
+            self.error_("Data Incorreta, tente dd/mm/aaaa", 5, 3)
+            return
+        else:
+            temp_data = self.data_bebê.get()
+            if int(temp_data[:2]) > 31 or int(temp_data[3:5]) > 12:
+                self.error_("Data Incorreta, tente dd/mm/aaaa", 5, 3)
+                return
+            data_bebê = temp_data[6:] + "-" + \
+                temp_data[3:5] + "-" + temp_data[:2]
 
-        # ---- ENVIAR BEBE ---- #
+        if not (re.match(r'\d{2}:\d{2}:\d{2}', self.hora_bebê.get())):
+            self.error_("Data Incorreta, tente hh:mm:ss", 5, 3)
+            return
+        else:
+            temp_hora = self.hora_bebê.get()
+            if (int(temp_hora[:2]) > 24 or int(temp_hora[3:5]) > 59 or
+                    int(temp_hora[6:]) > 59):
+                self.error_("Data Incorreta, tente hh:mm:ss", 5, 3)
+                return
+            hora_bebê = temp_hora[:2]+temp_hora[3:5]+temp_hora[6:]
+
+        try:
+            float(self.peso_bebê.get())
+        except ValueError:
+            self.error_("Insira um Peso Válido", 5, 4)
+            return
+
+        try:
+            float(self.altura_bebê.get())
+        except ValueError:
+            self.error_("Insira uma Altura Válida", 5, 5)
+            return
+
+        if not (BD_Valida_CPF_Mae(self.mãe)):
+            BD_export_Mae(self.mãe)
+            BD_export_parto(self.parto)
+
+        d_cpf = self.mãe.cpf[:5]  # 5 dígitos
+        n_data = data_bebê[5:7] + data_bebê[8:]  # 4 dígitos
+
+        self.parto.cod_parto = d_cpf + n_data
+        self.bebê = Bebê(self.mãe, self.médico, self.parto)
+
+        self.bebê.nome = self.nome_bebê.get()
+        self.bebê.sexo = self.sexo_bebe.get()
+        self.bebê.peso = float(self.peso_bebê.get())
+        self.bebê.altura = float(self.altura_bebê.get())
+        self.bebê.data_nasci = data_bebê
+        self.bebê.hora_nasci = hora_bebê
+        self.bebê.prematuro = self.pre_bebê.get()
+        self.bebê.sobrevive = self.sob_bebê.get()
+
+        print(self.parto.cod_parto)
+        BD_export_Bb(self.bebê)
 
         self.fechar_bebê()
+
+    def error_(self, text: str, x=10, y=10):
+        print(f"Error - {text}")
+        if self.val_erro:
+            self.error_message.destroy()
+
+        self.error_message = tk.Label(
+            self.base.tela_,
+            text=f"{text}"
+        )
+        self.error_message.grid(column=x, row=y, sticky='E')
 
 
 Iniciar_sistema()

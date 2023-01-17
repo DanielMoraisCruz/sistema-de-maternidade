@@ -24,7 +24,6 @@ def BD_export_Mae(mae: Mãe):
                  "{mae.data_nasci}")'''
     cursor.execute(comando)
     conexao.commit()
-    # type: ignore
 
 
 def BD_export_Bb(bb: Bebê):
@@ -42,7 +41,7 @@ def BD_export_Bb(bb: Bebê):
 
     comando = f'''INSERT INTO bebe(
                   Nome,Sexo,Peso,Altura,Nome_mae,CPF_mae,
-                  Nome_medico,Data_nasc,Hora_nasc,
+                  Nome_medico,Dt_nasc,Hora_nasc,
                   Cod_parto,Gemeo,Prematuro,Sobreviveu) VALUES(
                   "{bb.nome}",
                   "{bb.sexo}",
@@ -55,7 +54,7 @@ def BD_export_Bb(bb: Bebê):
                   "{bb.parto.cod_parto}",
                   "{gemeo}",
                   "{prematuro}",
-                  "{sobreviveu}",)'''
+                  "{sobreviveu}")'''
     cursor.execute(comando)
     conexao.commit()
 
@@ -72,21 +71,21 @@ def BD_export_medico(medico: Médico):
 def BD_export_parto(parto: Parto):
     if parto.mãe.num_filhos > 1:
         comando = f'''INSERT INTO parto (CPF_mae, CRM_medico, COD_parto,
-                      Data_parto, Gemeos, Num_Gemeos) VALUES (
+                      Dt_parto, Gemeos, Num_Gemeos) VALUES (
                       "{parto.mãe.cpf}",
                       "{parto.médico.crm}",
                       "{parto.cod_parto}",
                       "{parto.data_n}",
                       "{'S'}",
-                      "{parto.mãe.num_filhos}",)'''
+                      "{parto.mãe.num_filhos}")'''
     else:
         comando = f'''INSERT INTO parto (CPF_mae, CRM_medico, COD_parto,
-                      Data_parto, Gemeos) VALUES (
+                      Dt_parto, Gemeos) VALUES (
                       "{parto.mãe.cpf}",
                       "{parto.médico.crm}",
                       "{parto.cod_parto}",
                       "{parto.data_n}",
-                      "{'N'}",)'''
+                      "{'N'}")'''
     cursor.execute(comando)
     conexao.commit()
 

@@ -20,12 +20,16 @@ class Parto():
     def __init__(self) -> None:
         self.mãe: Mãe
         self.médico: Médico
-        self.cod_parto: int
-        self.data_n = "00000000"
+        self.cod_parto: str = "0"*9
+        self.data_n = "0000-00-00"
 
 
 class Bebê():
     def __init__(self, mae: Mãe, medico: Médico, parto: Parto) -> None:
+        self.mãe: Mãe = mae
+        self.médico: Médico = medico
+        self.parto: Parto = parto
+
         self.nome: str = ''
         self.sexo: str = ''
         self.peso: float = 0.0
@@ -34,10 +38,6 @@ class Bebê():
         self.hora_nasci: str = ''
         self.sobrevive: bool = True
         self.prematuro: bool = False
-
-        self.mãe: Mãe = mae
-        self.médico: Médico = medico
-        self.parto: Parto = parto
 
 
 class Usuario():
