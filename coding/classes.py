@@ -21,7 +21,7 @@ class Parto():
         self.mãe: Mãe
         self.médico: Médico
         self.cod_parto: int
-        self.data_n = "0000-00-00"
+        self.data_n = "00000000"
 
 
 class Bebê():
