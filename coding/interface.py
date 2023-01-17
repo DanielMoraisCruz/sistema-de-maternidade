@@ -3,9 +3,9 @@ import tkinter as tk
 
 from bancoDeDados import (BD_export_Admin, BD_export_Bb, BD_export_Mae,
                           BD_export_medico, BD_export_parto, BD_getInfo_adim,
-                          BD_getInfo_medico, BD_Valida_admin,
+                          BD_getInfo_medico, BD_GetMedico, BD_Valida_admin,
                           BD_Valida_CPF_Mae, BD_Valida_CRM_Medico,
-                          encerrar_conexao, BD_GetMedico)
+                          encerrar_conexao)
 from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 
@@ -503,10 +503,10 @@ class Menu_do_Parto():
             self.error_("Médico não encontrado", 5, 1)
             return
 
-        aux_med = BD_GetMedico(temp_med.crm)
+        aux_crm, aux_nome = BD_GetMedico(temp_med.crm)
 
-        self.parto.médico.crm = aux_med[0][0]
-        self.parto.médico.nome = aux_med[0][1]
+        self.parto.médico.crm = aux_crm
+        self.parto.médico.nome = aux_nome
 
         cpf = self.cpf.get()
         self.alter_cpf = cpf
