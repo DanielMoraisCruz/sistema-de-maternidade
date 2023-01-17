@@ -1,6 +1,6 @@
-from bancoDeDados import (BD_export_Bb, BD_export_Mae,
-                          BD_export_medico, BD_export_parto,
-                          BD_Valida_CPF_Mae, BD_Valida_CRM_Medico)
+from bancoDeDados import (BD_export_Bb, BD_export_Mae, BD_export_medico,
+                          BD_export_parto, BD_Valida_CPF_Mae,
+                          BD_Valida_CRM_Medico)
 from interface import Bebê, Mãe, Médico, Parto
 
 medico = Médico(

@@ -1,11 +1,11 @@
 import re
 import tkinter as tk
 
-
 from bancoDeDados import (BD_export_Admin, BD_export_Bb, BD_export_Mae,
                           BD_export_medico, BD_export_parto, BD_getInfo_adim,
                           BD_getInfo_medico, BD_Valida_admin,
-                          BD_Valida_CPF_Mae, BD_Valida_CRM_Medico, encerrar_conexao)
+                          BD_Valida_CPF_Mae, BD_Valida_CRM_Medico,
+                          encerrar_conexao, BD_GetMedico)
 from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 
@@ -474,9 +474,6 @@ class Menu_do_Parto():
         if not (self.enviado):
             self.base.Menu_inicial.cria_Menu()
         else:
-            # ---- ENVIA PARTO ----#
-
-            # ---- PEGA COD_PARTO ----#
             self.inserir_bebês()
 
     def error_(self, texto: str, x=10, y=10):
@@ -505,6 +502,11 @@ class Menu_do_Parto():
         if not (BD_Valida_CRM_Medico(temp_med)):
             self.error_("Médico não encontrado", 5, 1)
             return
+
+        aux_med = BD_GetMedico(temp_med.crm)
+
+        self.parto.médico.crm = aux_med[0][0]
+        self.parto.médico.nome = aux_med[0][1]
 
         cpf = self.cpf.get()
         self.alter_cpf = cpf
