@@ -45,6 +45,7 @@ def BD_export_Bb(bb: Bebê):
                   Cod_parto,Gemeo,Prematuro,Sobreviveu) VALUES(
                   "{bb.nome}",
                   "{bb.sexo}",
+                  "{bb.peso}",
                   "{bb.altura}",
                   "{bb.mãe.nome}",
                   "{bb.mãe.cpf}",
@@ -177,4 +178,4 @@ def BD_ConsutaDiaria(data: str):
     return resultado
 
 
-BD_ConsutaDiaria("20000102")
+# BD_ConsutaDiaria("20000102")

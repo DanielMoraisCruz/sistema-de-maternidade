@@ -475,7 +475,6 @@ class Menu_do_Parto():
             # ---- ENVIA PARTO ----#
 
             # ---- PEGA COD_PARTO ----#
-            self.cod_parto = 0
             self.inserir_bebês()
 
     def error_(self, texto: str, x=10, y=10):
@@ -756,7 +755,7 @@ class Menu_do_Bebê():
 
         self.titulo = tk.Label(
             self.base.tela_,
-            text=f"Insira o {len(self.mãe.lista_filhos)+1}° Bebê: ",
+            text="Insira o Bebê: ",
         )
         self.titulo.grid(
             column=1, row=0,
@@ -1019,16 +1018,15 @@ class Menu_do_Bebê():
             data_bebê = temp_data[6:] + "-" + \
                 temp_data[3:5] + "-" + temp_data[:2]
 
-        if not (re.match(r'\d{2}:\d{2}:\d{2}', self.hora_bebê.get())):
-            self.error_("Data Incorreta, tente hh:mm:ss", 5, 3)
+        if not (re.match(r'\d{2}:\d{2}', self.hora_bebê.get())):
+            self.error_("Data Incorreta, tente hh:mm", 5, 3)
             return
         else:
             temp_hora = self.hora_bebê.get()
-            if (int(temp_hora[:2]) > 24 or int(temp_hora[3:5]) > 59 or
-                    int(temp_hora[6:]) > 59):
-                self.error_("Data Incorreta, tente hh:mm:ss", 5, 3)
+            if (int(temp_hora[:2]) > 24 or int(temp_hora[3:5]) > 59):
+                self.error_("Data Incorreta, tente hh:mm", 5, 3)
                 return
-            hora_bebê = temp_hora[:2]+temp_hora[3:5]+temp_hora[6:]
+            hora_bebê = temp_hora[:2]+temp_hora[3:5]
 
         try:
             float(self.peso_bebê.get())
@@ -1042,15 +1040,17 @@ class Menu_do_Bebê():
             self.error_("Insira uma Altura Válida", 5, 5)
             return
 
-        if not (BD_Valida_CPF_Mae(self.mãe)):
-            BD_export_Mae(self.mãe)
-            BD_export_parto(self.parto)
-
         d_cpf = self.mãe.cpf[:5]  # 5 dígitos
         n_data = data_bebê[5:7] + data_bebê[8:]  # 4 dígitos
 
         self.parto.cod_parto = d_cpf + n_data
+        self.parto.data_n = data_bebê
+        print(self.parto.cod_parto)
         self.bebê = Bebê(self.mãe, self.médico, self.parto)
+
+        if not (BD_Valida_CPF_Mae(self.mãe)):
+            BD_export_Mae(self.mãe)
+            BD_export_parto(self.parto)
 
         self.bebê.nome = self.nome_bebê.get()
         self.bebê.sexo = self.sexo_bebe.get()
@@ -1061,7 +1061,9 @@ class Menu_do_Bebê():
         self.bebê.prematuro = self.pre_bebê.get()
         self.bebê.sobrevive = self.sob_bebê.get()
 
-        print(self.parto.cod_parto)
+        print(self.bebê.parto.cod_parto == self.parto.cod_parto,
+              self.bebê.parto.cod_parto, self.parto.cod_parto)
+
         BD_export_Bb(self.bebê)
 
         self.fechar_bebê()
