@@ -502,6 +502,7 @@ class Menu_do_Parto():
         temp_med = Médico(crm=self.caixa_crm.get())
         if not (BD_Valida_CRM_Medico(temp_med)):
             self.error_("Médico não encontrado", 5, 1)
+            return
 
         cpf = self.cpf.get()
         self.alter_cpf = cpf
@@ -1045,7 +1046,9 @@ class Menu_do_Bebê():
 
         self.parto.cod_parto = d_cpf + n_data
         self.parto.data_n = data_bebê
-        print(self.parto.cod_parto)
+
+        
+
         self.bebê = Bebê(self.mãe, self.médico, self.parto)
 
         if not (BD_Valida_CPF_Mae(self.mãe)):
@@ -1060,9 +1063,6 @@ class Menu_do_Bebê():
         self.bebê.hora_nasci = hora_bebê
         self.bebê.prematuro = self.pre_bebê.get()
         self.bebê.sobrevive = self.sob_bebê.get()
-
-        print(self.bebê.parto.cod_parto == self.parto.cod_parto,
-              self.bebê.parto.cod_parto, self.parto.cod_parto)
 
         BD_export_Bb(self.bebê)
 

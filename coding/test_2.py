@@ -10,17 +10,17 @@ medico = Médico(
 )
 
 mae = Mãe()
-mae.cpf = "96001372268"
-mae.nome = "ame"
-mae.data_nasci = "1111-01-01"
+mae.cpf = "96011372268"
+mae.nome = "am2e"
+mae.data_nasci = "1131-01-01"
 mae.num_filhos = 1
 
 
 parto = Parto()
 parto.mãe = mae
 parto.médico = medico
-parto.cod_parto = "123472111"
-parto.data_n = '2023-11-12'
+parto.cod_parto = "960111114"
+parto.data_n = '2023-11-14'
 
 bebe = Bebê(
     mae,
@@ -28,12 +28,12 @@ bebe = Bebê(
     parto
 )
 
-bebe.nome = 'aaa'
+bebe.nome = 'abb'
 bebe.sexo = "M"
 bebe.peso = 1
 bebe.altura = 1
-bebe.data_nasci = '2023-11-22'
-bebe.hora_nasci = '00:00'
+bebe.data_nasci = '2023-11-14'
+bebe.hora_nasci = '01:00'
 bebe.sobrevive = True
 bebe.prematuro = False
 
