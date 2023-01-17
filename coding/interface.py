@@ -1,10 +1,11 @@
 import re
 import tkinter as tk
 
+
 from bancoDeDados import (BD_export_Admin, BD_export_Bb, BD_export_Mae,
                           BD_export_medico, BD_export_parto, BD_getInfo_adim,
                           BD_getInfo_medico, BD_Valida_admin,
-                          BD_Valida_CPF_Mae, BD_Valida_CRM_Medico)
+                          BD_Valida_CPF_Mae, BD_Valida_CRM_Medico, encerrar_conexao)
 from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 
@@ -22,6 +23,7 @@ class Iniciar_sistema():
 
         self.escolha_inicial()
         self.root.mainloop()
+        encerrar_conexao()
 
     def tela(self):
         self.root.title("MATERNIDADE MARIA")
@@ -1046,8 +1048,6 @@ class Menu_do_Bebê():
 
         self.parto.cod_parto = d_cpf + n_data
         self.parto.data_n = data_bebê
-
-        
 
         self.bebê = Bebê(self.mãe, self.médico, self.parto)
 

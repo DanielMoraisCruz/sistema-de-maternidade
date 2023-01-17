@@ -178,4 +178,20 @@ def BD_ConsutaDiaria(data: str):
     return resultado
 
 
+#----   PEGA INFORMAÇÕES    ----#
+
+def BD_GetMedico(CRM:str):
+    comando = f'''SELECT CRM,Nome
+                  FROM maternidade.medico 
+                  WHERE "{CRM}" = CRM'''
+    cursor.execute(comando)
+    resultado = cursor.fetchall();
+    print(resultado)
+    return resultado
+
+#----   ENCERRAR A CONEXÃO   ----#
+
+def encerrar_conexao():
+    cursor.close()
+    conexao.close()
 # BD_ConsutaDiaria("20000102")
