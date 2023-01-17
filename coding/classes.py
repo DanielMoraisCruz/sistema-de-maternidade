@@ -25,7 +25,7 @@ class Parto():
 
 
 class Bebê():
-    def __init__(self, mae: Mãe, medico: Médico, parto) -> None:
+    def __init__(self, mae: Mãe, medico: Médico, parto: Parto) -> None:
         self.nome: str = ''
         self.sexo: str = ''
         self.peso: float = 0.0
@@ -37,7 +37,7 @@ class Bebê():
 
         self.mãe: Mãe = mae
         self.médico: Médico = medico
-        self.parto = parto
+        self.parto: Parto = parto
 
 
 class Usuario():
