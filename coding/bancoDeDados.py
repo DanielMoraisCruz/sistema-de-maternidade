@@ -187,7 +187,8 @@ def BD_GetMedico(CRM: str):
     cursor.execute(comando)
     resultado = cursor.fetchall()
     print(resultado)
-    return resultado
+
+    return resultado if resultado != [] else ['', '']
 
 # ----   ENCERRAR A CONEXÃO   ----#
 

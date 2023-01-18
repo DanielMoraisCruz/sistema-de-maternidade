@@ -1,11 +1,13 @@
 import re
 import tkinter as tk
+from datetime import date
+from tkinter import ttk
 
-from bancoDeDados import (BD_export_Admin, BD_export_Bb, BD_export_Mae,
-                          BD_export_medico, BD_export_parto, BD_getInfo_adim,
-                          BD_getInfo_medico, BD_GetMedico, BD_Valida_admin,
-                          BD_Valida_CPF_Mae, BD_Valida_CRM_Medico,
-                          encerrar_conexao)
+from bancoDeDados import (BD_ConsutaDiaria, BD_export_Admin, BD_export_Bb,
+                          BD_export_Mae, BD_export_medico, BD_export_parto,
+                          BD_getInfo_adim, BD_getInfo_medico, BD_GetMedico,
+                          BD_Valida_admin, BD_Valida_CPF_Mae,
+                          BD_Valida_CRM_Medico, encerrar_conexao)
 from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 
@@ -204,10 +206,62 @@ class Menu_inicial():
         )
         self.bt_médico.grid(column=3, row=1, padx=0.5, pady=0.5)
 
+        self.espaço = tk.Label(
+            self.base.tela_,
+            text=""
+        )
+        self.espaço.grid(
+            column=1, row=4,
+            padx=2, pady=2,
+            sticky='W'
+        )
+
+        self.bt_relatorio = tk.Button(
+            self.base.tela_,
+            text="Relatório",
+            command=self.relatorio_diario
+        )
+        self.bt_relatorio.grid(column=1, row=5, padx=0.5, pady=0.5)
+
+        self.tela_2 = tk.Frame(self.base.tela_, background='gray')
+        self.tela_2.place(relx=0.02, rely=0.25, relwidth=0.96, relheight=0.75)
+        
+        self.Lista = ttk.Treeview(
+            self.tela_2,
+            columns=("CRM", "medico.Nome", "parto.CPF_mae", "mae.Nome",
+                     "mae.Dt_nasc", "bebe.Nome", "Sexo", "bebe.Dt_nasc",
+                     "Peso", "Altura"),
+            show='headings'
+        )
+
+        self.Lista.heading("CRM", text='CRM Médico')
+        self.Lista.heading("medico.Nome", text='Nome Médico')
+        self.Lista.heading("parto.CPF_mae", text='CPF Mãe')
+        self.Lista.heading("mae.Nome", text='Nome Mãe')
+        self.Lista.heading("mae.Dt_nasc", text='Data Nascimento')
+        self.Lista.heading("bebe.Nome", text='Nome Bebê')
+        self.Lista.heading("Sexo", text='Sexo Bebê')
+        self.Lista.heading("bebe.Dt_nasc", text='Data N/ Bebê')
+        self.Lista.heading("Peso", text='Peso Bebê')
+        self.Lista.heading("Altura", text='Altura Bebê')
+        self.Lista.pack()
+
     def fechar_Menu(self):
         self.intro.destroy()
         self.bt_parto.destroy()
         self.bt_médico.destroy()
+
+    def relatorio_diario(self):
+        relatório = BD_ConsutaDiaria(str(date.today()))
+
+        for (crm, medico_Nome, parto_CPF_mae, mae_Nome, mae_Dt_nasc, bebe_Nome,
+             sexo, bebe_Dt_nasc, peso, altura) in relatório:
+            self.Lista.insert(
+                "",
+                "end",
+                values=(crm, medico_Nome, parto_CPF_mae,
+                        mae_Nome, mae_Dt_nasc, bebe_Nome,
+                        sexo, bebe_Dt_nasc, peso, altura))
 
 
 class Menu_do_Parto():
@@ -503,10 +557,10 @@ class Menu_do_Parto():
             self.error_("Médico não encontrado", 5, 1)
             return
 
-        aux_crm, aux_nome = BD_GetMedico(temp_med.crm)
+        aux_crm_nome = BD_GetMedico(temp_med.crm)
 
-        self.parto.médico.crm = aux_crm
-        self.parto.médico.nome = aux_nome
+        self.parto.médico.crm = aux_crm_nome[0]
+        self.parto.médico.nome = aux_crm_nome[1]
 
         cpf = self.cpf.get()
         self.alter_cpf = cpf
