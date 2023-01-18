@@ -132,6 +132,16 @@ def BD_Valida_CRM_Medico(doc: Médico):
     print(resultado)
     return (False if resultado == [] else True)
 
+
+def BD_Valida_parto(parto: Parto):
+    comando = f'''SELECT Cod_parto
+                 FROM maternidade.parto
+                 WHERE "{parto.cod_parto}" = Cod_parto'''
+    cursor.execute(comando)
+    resultado = cursor.fetchall()
+    print(resultado)
+    return (False if resultado == [] else True)
+
     #   ----CONSULTAR INFORMAÇÕES---- #
 
 
@@ -185,7 +195,7 @@ def BD_GetMedico(CRM: str):
                   FROM maternidade.medico
                   WHERE "{CRM}" = CRM'''
     cursor.execute(comando)
-    resultado = cursor.fetchall()
+    resultado = list(cursor.fetchall())
     print(resultado)
 
     return resultado if resultado != [] else ['', '']
