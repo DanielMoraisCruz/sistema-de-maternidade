@@ -7,7 +7,8 @@ from bancoDeDados import (BD_ConsutaDiaria, BD_export_Admin, BD_export_Bb,
                           BD_export_Mae, BD_export_medico, BD_export_parto,
                           BD_getInfo_adim, BD_getInfo_medico, BD_GetMedico,
                           BD_Valida_admin, BD_Valida_CPF_Mae,
-                          BD_Valida_CRM_Medico, encerrar_conexao)
+                          BD_Valida_CRM_Medico, BD_Valida_parto,
+                          encerrar_conexao)
 from classes import Bebê, Mãe, Médico, Parto, Usuario
 
 
@@ -223,9 +224,9 @@ class Menu_inicial():
         )
         self.bt_relatorio.grid(column=1, row=5, padx=0.5, pady=0.5)
 
-        self.tela_2 = tk.Frame(self.base.tela_, background='gray')
-        self.tela_2.place(relx=0.02, rely=0.25, relwidth=0.96, relheight=0.75)
-        
+        self.tela_2 = tk.Frame(self.base.tela_, background='lightgray')
+        self.tela_2.place(relx=0.02, rely=0.25, relwidth=0.96, relheight=0.73)
+
         self.Lista = ttk.Treeview(
             self.tela_2,
             columns=("CRM", "medico.Nome", "parto.CPF_mae", "mae.Nome",
@@ -247,9 +248,14 @@ class Menu_inicial():
         self.Lista.pack()
 
     def fechar_Menu(self):
+        self.Lista.destroy()
+        self.tela_2.destroy()
+
         self.intro.destroy()
         self.bt_parto.destroy()
         self.bt_médico.destroy()
+        self.espaço.destroy()
+        self.bt_relatorio.destroy()
 
     def relatorio_diario(self):
         relatório = BD_ConsutaDiaria(str(date.today()))
@@ -559,8 +565,8 @@ class Menu_do_Parto():
 
         aux_crm_nome = BD_GetMedico(temp_med.crm)
 
-        self.parto.médico.crm = aux_crm_nome[0]
-        self.parto.médico.nome = aux_crm_nome[1]
+        self.parto.médico.crm = aux_crm_nome[0][0]
+        self.parto.médico.nome = aux_crm_nome[0][1]
 
         cpf = self.cpf.get()
         self.alter_cpf = cpf
@@ -1099,11 +1105,17 @@ class Menu_do_Bebê():
             self.error_("Insira uma Altura Válida", 5, 5)
             return
 
-        d_cpf = self.mãe.cpf[:5]  # 5 dígitos
+        d_cpf = self.mãe.cpf[:4]  # 4 dígitos
         n_data = data_bebê[5:7] + data_bebê[8:]  # 4 dígitos
+        i = 0
+        data_bebê = d_cpf + n_data + str(i)
+        while BD_Valida_parto(d_cpf + n_data + str(i)):
 
-        self.parto.cod_parto = d_cpf + n_data
-        self.parto.data_n = data_bebê
+            print('Ja existe um parto igual')
+            i += 1
+            data_bebê_ = data_bebê + str(i)
+
+        self.parto.cod_parto = self.parto.data_n + data_bebê_
 
         self.bebê = Bebê(self.mãe, self.médico, self.parto)
 

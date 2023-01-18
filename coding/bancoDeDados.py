@@ -195,7 +195,7 @@ def BD_GetMedico(CRM: str):
                   FROM maternidade.medico
                   WHERE "{CRM}" = CRM'''
     cursor.execute(comando)
-    resultado = list(cursor.fetchall())
+    resultado = cursor.fetchall()
     print(resultado)
 
     return resultado if resultado != [] else ['', '']
