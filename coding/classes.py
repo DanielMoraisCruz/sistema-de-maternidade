@@ -10,17 +10,17 @@ class Mãe():
 
 
 class Médico():
-    def __init__(self, crm='', espec='', nome='') -> None:
+    def __init__(self, crm='', especial='', nome='') -> None:
         self.crm: str = crm
-        self.espec: str = espec
+        self.especial: str = especial
         self.nome: str = nome
 
 
 class Parto():
-    def __init__(self) -> None:
+    def __init__(self, cod_="0"*9) -> None:
         self.mãe: Mãe
         self.médico: Médico
-        self.cod_parto: str = "0"*9
+        self.cod_parto: str = cod_
         self.data_n = "0000-00-00"
 
 
@@ -40,7 +40,7 @@ class Bebê():
         self.prematuro: bool = False
 
 
-class Usuario():
+class Usuário():
     def __init__(self, cpf: str, senha: str) -> None:
         self.cpf: str = cpf
         self.senha: str = senha

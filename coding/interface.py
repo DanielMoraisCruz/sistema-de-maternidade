@@ -3,13 +3,12 @@ import tkinter as tk
 from datetime import date
 from tkinter import ttk
 
-from bancoDeDados import (BD_ConsutaDiaria, BD_export_Admin, BD_export_Bb,
+from bancoDeDados import (BD_ConsultaDiária, BD_export_Admin, BD_export_Bb,
                           BD_export_Mae, BD_export_medico, BD_export_parto,
-                          BD_getInfo_adim, BD_getInfo_medico, BD_GetMedico,
+                          BD_getInfo_admin, BD_getInfo_medico, BD_GetMedico,
                           BD_Valida_admin, BD_Valida_CPF_Mae,
-                          BD_Valida_CRM_Medico, BD_Valida_parto,
-                          encerrar_conexao)
-from classes import Bebê, Mãe, Médico, Parto, Usuario
+                          BD_Valida_CRM_Medico, BD_Valida_parto)
+from classes import Bebê, Mãe, Médico, Parto, Usuário
 
 
 class Iniciar_sistema():
@@ -26,7 +25,7 @@ class Iniciar_sistema():
 
         self.escolha_inicial()
         self.root.mainloop()
-        encerrar_conexao()
+        # BD_encerrar_conexão()
 
     def tela(self):
         self.root.title("MATERNIDADE MARIA")
@@ -45,7 +44,7 @@ class Iniciar_sistema():
         self.tab_2.grid(column=0, row=0, padx=2, pady=2)
 
     def escolha_inicial(self):
-        if BD_getInfo_adim():
+        if BD_getInfo_admin():
             self.tela_login()
         else:
             self.tela_login(True)
@@ -110,7 +109,7 @@ class Iniciar_sistema():
             self.alter_cpf = (cpf[0:3]+cpf[4:7] +
                               cpf[8:11]+cpf[12:14])  # 012.456.890-90
 
-        self.user = Usuario(self.alter_cpf, self.senha_En.get())
+        self.user = Usuário(self.alter_cpf, self.senha_En.get())
 
         if BD_Valida_admin(self.user):
             self.deleta_login()
@@ -130,7 +129,7 @@ class Iniciar_sistema():
             self.erro_de_login('CPF invalido')
         else:
             print(self.alter_cpf)
-            self.user = Usuario(self.alter_cpf, self.senha_En.get())
+            self.user = Usuário(self.alter_cpf, self.senha_En.get())
 
             if BD_Valida_admin(self.user, True):
                 print('CPF Já está Cadastrado')
@@ -173,6 +172,9 @@ class Iniciar_sistema():
 class Menu_inicial():
     def __init__(self, base: Iniciar_sistema) -> None:
         self.base = base
+        self.val_relatório: bool = False
+        self.val_erro: bool = False
+        self.error_message: tk.Label
 
     def cria_Menu(self):
         self.intro = tk.Label(
@@ -217,35 +219,29 @@ class Menu_inicial():
             sticky='W'
         )
 
-        self.bt_relatorio = tk.Button(
+        self.bt_relatório = tk.Button(
             self.base.tela_,
             text="Relatório",
-            command=self.relatorio_diario
+            command=self.relatório_diário
         )
-        self.bt_relatorio.grid(column=1, row=5, padx=0.5, pady=0.5)
+        self.bt_relatório.grid(column=1, row=5, padx=0.5, pady=0.5)
+
+        self.insere_dia = tk.Label(
+            self.base.tela_,
+            text="Partos do Dia:"
+        )
+        self.insere_dia.grid(
+            column=2, row=5, padx=0.1, pady=0.1,
+            sticky='W'
+        )
+
+        self.dia_relatório = tk.Entry(self.base.tela_)
+        self.dia_relatório.grid(column=3, row=5, padx=0.1, pady=0.1)
 
         self.tela_2 = tk.Frame(self.base.tela_, background='lightgray')
         self.tela_2.place(relx=0.02, rely=0.25, relwidth=0.96, relheight=0.73)
 
-        self.Lista = ttk.Treeview(
-            self.tela_2,
-            columns=("CRM", "medico.Nome", "parto.CPF_mae", "mae.Nome",
-                     "mae.Dt_nasc", "bebe.Nome", "Sexo", "bebe.Dt_nasc",
-                     "Peso", "Altura"),
-            show='headings'
-        )
-
-        self.Lista.heading("CRM", text='CRM Médico')
-        self.Lista.heading("medico.Nome", text='Nome Médico')
-        self.Lista.heading("parto.CPF_mae", text='CPF Mãe')
-        self.Lista.heading("mae.Nome", text='Nome Mãe')
-        self.Lista.heading("mae.Dt_nasc", text='Data Nascimento')
-        self.Lista.heading("bebe.Nome", text='Nome Bebê')
-        self.Lista.heading("Sexo", text='Sexo Bebê')
-        self.Lista.heading("bebe.Dt_nasc", text='Data N/ Bebê')
-        self.Lista.heading("Peso", text='Peso Bebê')
-        self.Lista.heading("Altura", text='Altura Bebê')
-        self.Lista.pack()
+        self.cria_lista_relatório()
 
     def fechar_Menu(self):
         self.Lista.destroy()
@@ -255,10 +251,30 @@ class Menu_inicial():
         self.bt_parto.destroy()
         self.bt_médico.destroy()
         self.espaço.destroy()
-        self.bt_relatorio.destroy()
+        self.bt_relatório.destroy()
+        self.insere_dia.destroy()
+        self.dia_relatório.destroy()
 
-    def relatorio_diario(self):
-        relatório = BD_ConsutaDiaria(str(date.today()))
+    def relatório_diário(self):
+        if self.val_relatório:
+            self.deleta_diário()
+
+        if self.dia_relatório.get() == "":
+            temp_data = str(date.today())
+        else:
+            if not (re.match(r'\d{2}/\d{2}/\d{4}', self.dia_relatório.get())):
+                self.error_("Data Incorreta, tente dd/mm/aaaa", 5, 5)
+                return
+            else:
+                temp_data = self.dia_relatório.get()
+                if int(temp_data[:2]) > 31 or int(temp_data[3:5]) > 12:
+                    self.error_("Data Incorreta, tente dd/mm/aaaa", 5, 5)
+                    return
+
+                temp_data = temp_data[6:] + "-" + \
+                    temp_data[3:5] + "-" + temp_data[:2]
+
+        relatório = BD_ConsultaDiária(temp_data)
 
         for (crm, medico_Nome, parto_CPF_mae, mae_Nome, mae_Dt_nasc, bebe_Nome,
              sexo, bebe_Dt_nasc, peso, altura) in relatório:
@@ -268,6 +284,55 @@ class Menu_inicial():
                 values=(crm, medico_Nome, parto_CPF_mae,
                         mae_Nome, mae_Dt_nasc, bebe_Nome,
                         sexo, bebe_Dt_nasc, peso, altura))
+
+        self.val_relatório = True
+
+    def deleta_diário(self):
+        self.Lista.destroy()
+        self.cria_lista_relatório()
+
+    def cria_lista_relatório(self):
+        self.Lista = ttk.Treeview(
+            self.tela_2,
+            columns=("CRM", "medico.Nome", "parto.CPF_mae", "mae.Nome",
+                     "mae.Dt_nasc", "bebe.Nome", "Sexo", "bebe.Dt_nasc",
+                     "Peso", "Altura"),
+            show='headings'
+        )
+
+        self.Lista.column("CRM",            minwidth=0,   width=80)
+        self.Lista.column("medico.Nome",    minwidth=0,   width=50)
+        self.Lista.column("parto.CPF_mae",  minwidth=0,   width=80)
+        self.Lista.column("mae.Nome",       minwidth=0,   width=50)
+        self.Lista.column("mae.Dt_nasc",    minwidth=0,   width=80)
+        self.Lista.column("bebe.Nome",      minwidth=0,   width=80)
+        self.Lista.column("Sexo",           minwidth=0,   width=35)
+        self.Lista.column("bebe.Dt_nasc",   minwidth=0,   width=80)
+        self.Lista.column("Peso",           minwidth=0,   width=35)
+        self.Lista.column("Altura",         minwidth=0,   width=40)
+
+        self.Lista.heading("CRM", text='Médico CRM')
+        self.Lista.heading("medico.Nome", text='Nome')
+        self.Lista.heading("parto.CPF_mae", text='Mãe CPF')
+        self.Lista.heading("mae.Nome", text='Nome')
+        self.Lista.heading("mae.Dt_nasc", text='Data Nasc')
+        self.Lista.heading("bebe.Nome", text='Bebê Nome')
+        self.Lista.heading("Sexo", text='Sexo')
+        self.Lista.heading("bebe.Dt_nasc", text='Data Nasc')
+        self.Lista.heading("Peso", text='Peso')
+        self.Lista.heading("Altura", text='Altura')
+        self.Lista.pack()
+
+    def error_(self, text: str, x=10, y=10):
+        print(f"Error - {text}")
+        if self.val_erro:
+            self.error_message.destroy()
+
+        self.error_message = tk.Label(
+            self.base.tela_,
+            text=f"{text}"
+        )
+        self.error_message.grid(column=x, row=y, sticky='E')
 
 
 class Menu_do_Parto():
@@ -655,26 +720,26 @@ class Menu_do_Médico():
             padx=0.5, pady=0.5,
             sticky='WE'
         )
-        self.digitos = tk.Entry(self.base.tela_)
-        self.digitos.grid(
+        self.dígitos = tk.Entry(self.base.tela_)
+        self.dígitos.grid(
             column=3, row=2, columnspan=3,
             padx=0.5, pady=0.5,
             sticky='W'
         )
 
         # Especialidade
-        self.info_espec = tk.Label(
+        self.info_especial = tk.Label(
             self.base.tela_,
             text="Especialidade: ",
         )
-        self.info_espec.grid(
+        self.info_especial.grid(
             column=1, row=3,
             padx=0.5, pady=0.5,
             sticky='E'
         )
 
-        self.espec = tk.Entry(self.base.tela_)
-        self.espec.grid(
+        self.especial = tk.Entry(self.base.tela_)
+        self.especial.grid(
             column=2, row=3, columnspan=3,
             padx=0.5, pady=0.5,
             sticky='WE'
@@ -718,9 +783,9 @@ class Menu_do_Médico():
         self.info_médico.destroy()
         self.info_CRM.destroy()
         self.sigla.destroy()
-        self.digitos.destroy()
-        self.info_espec.destroy()
-        self.espec.destroy()
+        self.dígitos.destroy()
+        self.info_especial.destroy()
+        self.especial.destroy()
         self.info_nome.destroy()
         self.med_nome.destroy()
 
@@ -756,9 +821,9 @@ class Menu_do_Médico():
         return True
 
     def enviar(self):
-        crm = "CRM/" + self.sigla.get() + self.digitos.get()
+        crm = "CRM/" + self.sigla.get() + self.dígitos.get()
 
-        if ((self.sigla.get() == '') and (self.espec.get() == '') and
+        if ((self.sigla.get() == '') and (self.especial.get() == '') and
                 (self.med_nome.get() == '')):
             self.error_("Nenhum valor inserido", 5, 10)
             return
@@ -771,7 +836,7 @@ class Menu_do_Médico():
 
         self.medico_ = Médico(
             crm=crm,
-            espec=self.espec.get(),
+            especial=self.especial.get(),
             nome=self.med_nome.get()
         )
 
@@ -1105,21 +1170,10 @@ class Menu_do_Bebê():
             self.error_("Insira uma Altura Válida", 5, 5)
             return
 
-        d_cpf = self.mãe.cpf[:4]  # 4 dígitos
-        n_data = data_bebê[5:7] + data_bebê[8:]  # 4 dígitos
-        i = 0
-        data_bebê = d_cpf + n_data + str(i)
-        while BD_Valida_parto(d_cpf + n_data + str(i)):
-
-            print('Ja existe um parto igual')
-            i += 1
-            data_bebê_ = data_bebê + str(i)
-
-        self.parto.cod_parto = self.parto.data_n + data_bebê_
-
         self.bebê = Bebê(self.mãe, self.médico, self.parto)
-
         if not (BD_Valida_CPF_Mae(self.mãe)):
+            self.parto.cod_parto = self.gera_código()
+            self.parto.data_n = data_bebê
             BD_export_Mae(self.mãe)
             BD_export_parto(self.parto)
 
@@ -1132,9 +1186,25 @@ class Menu_do_Bebê():
         self.bebê.prematuro = self.pre_bebê.get()
         self.bebê.sobrevive = self.sob_bebê.get()
 
-        BD_export_Bb(self.bebê)
-
+        val_ = BD_export_Bb(self.bebê)
+        if val_:
+            self.error_("Erro ao Inserir Bebê", 5, 5)
+            return
         self.fechar_bebê()
+
+    def gera_código(self, i=1):
+        cod = str(i)
+        while (len(("0"*i) + cod) < 9):
+            i += 1
+        cod_novo = ("0"*i) + cod
+        print(cod_novo)
+        temp_parto = Parto(cod_novo)
+        if BD_Valida_parto(temp_parto):
+            print('Ja existe um parto igual')
+            i += 1
+            return self.gera_código(i)
+        else:
+            return cod_novo
 
     def error_(self, text: str, x=10, y=10):
         print(f"Error - {text}")

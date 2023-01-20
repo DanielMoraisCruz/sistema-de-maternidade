@@ -1,16 +1,16 @@
 import mysql.connector
-from classes import Bebê, Mãe, Médico, Parto, Usuario
+from classes import Bebê, Mãe, Médico, Parto, Usuário
 
-conexao = mysql.connector.connect(  # funcao que realiza a conexão
+conexão = mysql.connector.connect(  # função que realiza a conexão
                                     # entre o programa e o BD
     host='localhost',   # passar o host, se o BD estiver no seu computador use
                         # local Host
-    user='root',  # Usuario do BD
+    user='root',  # Usuário do BD
     password='OlljFVAZlRVsdNiTncrS',  # Senha do BD
     database='maternidade',  # Nome do esquema que será alterado
 )
 
-cursor = conexao.cursor()
+cursor = conexão.cursor()
 
 #   ----INSERIR INFORMAÇÕES---- #
 
@@ -22,14 +22,18 @@ def BD_export_Mae(mae: Mãe):
                  "{mae.endereço}",
                  "{mae.telefone}",
                  "{mae.data_nasci}")'''
-    cursor.execute(comando)
-    conexao.commit()
+    try:
+        cursor.execute(comando)
+    except mysql.connector.errors.DataError as error_:
+        print(error_, BD_export_Mae.__name__)
+    else:
+        conexão.commit()
 
 
 def BD_export_Bb(bb: Bebê):
-    gemeo = 'N'
+    gêmeo = 'N'
     if bb.mãe.num_filhos > 1:
-        gemeo = 'S'
+        gêmeo = 'S'
 
     prematuro = 'N'
     if bb.prematuro:
@@ -53,20 +57,27 @@ def BD_export_Bb(bb: Bebê):
                   "{bb.data_nasci}",
                   "{bb.hora_nasci}",
                   "{bb.parto.cod_parto}",
-                  "{gemeo}",
+                  "{gêmeo}",
                   "{prematuro}",
                   "{sobreviveu}")'''
-    cursor.execute(comando)
-    conexao.commit()
+    try:
+        cursor.execute(comando)
+    except mysql.connector.errors.IntegrityError as error_:
+        print(error_)
+        return False
+    else:
+        print(BD_export_Bb.__name__, ' - OK')
+        conexão.commit()
+        return True
 
 
 def BD_export_medico(medico: Médico):
     comando = f'''INSERT INTO medico (CRM,Especialidade,Nome) VALUES (
                  "{medico.crm}",
-                 "{medico.espec}",
+                 "{medico.especial}",
                  "{medico.nome}")'''
     cursor.execute(comando)
-    conexao.commit()
+    conexão.commit()
 
 
 def BD_export_parto(parto: Parto):
@@ -88,20 +99,20 @@ def BD_export_parto(parto: Parto):
                       "{parto.data_n}",
                       "{'N'}")'''
     cursor.execute(comando)
-    conexao.commit()
+    conexão.commit()
 
 
-def BD_export_Admin(User: Usuario):
+def BD_export_Admin(User: Usuário):
     comando = f'''INSERT INTO admins(CPF,senha) VALUES (
                   "{User.cpf}",
                   "{User.senha}")'''
     cursor.execute(comando)
-    conexao.commit()
+    conexão.commit()
 
 #   ----VALIDAR INFORMAÇÕES---- #
 
 
-def BD_Valida_admin(user: Usuario, p_cpf=False):
+def BD_Valida_admin(user: Usuário, p_cpf=False):
 
     if not (p_cpf):
         comando = f'''SELECT cpf FROM maternidade.admins
@@ -119,17 +130,20 @@ def BD_Valida_CPF_Mae(mae: Mãe):
     comando = f'''SELECT CPF FROM maternidade.mae
                   WHERE CPF = "{mae.cpf}"'''
     cursor.execute(comando)
+
     resultado = cursor.fetchall()
-    print(resultado)
+    print(resultado, BD_Valida_CPF_Mae.__name__, ' - OK')
     return (False if resultado == [] else True)
 
 
-def BD_Valida_CRM_Medico(doc: Médico):
+def BD_Valida_CRM_Medico(med: Médico):
+    print(med.crm)
     comando = f'''SELECT CRM FROM maternidade.medico
-                  WHERE CRM = "{doc.crm}"'''
+                  WHERE CRM = "{med.crm}"'''
+    print(comando)
     cursor.execute(comando)
     resultado = cursor.fetchall()
-    print(resultado)
+    print(resultado, BD_Valida_CRM_Medico.__name__, ' - OK')
     return (False if resultado == [] else True)
 
 
@@ -139,17 +153,17 @@ def BD_Valida_parto(parto: Parto):
                  WHERE "{parto.cod_parto}" = Cod_parto'''
     cursor.execute(comando)
     resultado = cursor.fetchall()
-    print(resultado)
+    print(resultado, BD_Valida_parto.__name__, ' - OK')
     return (False if resultado == [] else True)
 
     #   ----CONSULTAR INFORMAÇÕES---- #
 
 
-def BD_getInfo_adim():
+def BD_getInfo_admin():
     comando = 'SELECT cpf FROM maternidade.admins'
     cursor.execute(comando)
     resultado = cursor.fetchall()  # ler o banco de dados
-    print(resultado)
+    print(resultado, BD_getInfo_admin.__name__, ' - OK')
     return (False if resultado == [] else True)
 
 
@@ -164,7 +178,7 @@ def BD_getInfo_medico():
     comando = 'SELECT CRM,Nome FROM maternidade.medico'
     cursor.execute(comando)
     resultado = cursor.fetchall()  # ler o banco de dados
-    print(resultado)
+    print(resultado, BD_getInfo_medico.__name__, ' - OK')
     return (False if resultado == [] else True)
 
 
@@ -172,10 +186,11 @@ def BD_getInfo_bebe():
     comando = 'SELECT Nome,Sexo,Dt_nasc,Peso,Altura FROM maternidade.bebe'
     cursor.execute(comando)
     resultado = cursor.fetchall()
+    print(resultado, BD_getInfo_bebe.__name__, ' - OK')
     return resultado
 
 
-def BD_ConsutaDiaria(data: str):
+def BD_ConsultaDiária(data: str):
     comando = f'''SELECT CRM, medico.Nome, parto.CPF_mae, mae.Nome,
                   mae.Dt_nasc,bebe.Nome,Sexo,bebe.Dt_nasc,Peso, Altura
                   FROM maternidade.medico, maternidade.mae,
@@ -184,7 +199,7 @@ def BD_ConsutaDiaria(data: str):
                   AND CRM_medico = CRM and parto.CPF_mae = CPF'''
     cursor.execute(comando)
     resultado = cursor.fetchall()
-    print(resultado)
+    print(resultado, BD_ConsultaDiária.__name__, ' - OK')
     return resultado
 
 
@@ -196,14 +211,14 @@ def BD_GetMedico(CRM: str):
                   WHERE "{CRM}" = CRM'''
     cursor.execute(comando)
     resultado = cursor.fetchall()
-    print(resultado)
+    print(resultado, BD_GetMedico.__name__, ' - OK')
 
     return resultado if resultado != [] else ['', '']
 
 # ----   ENCERRAR A CONEXÃO   ----#
 
 
-def encerrar_conexao():
+def BD_encerrar_conexão():
     cursor.close()
-    conexao.close()
-# BD_ConsutaDiaria("20000102")
+    conexão.close()
+# BD_ConsultaDiária("20000102")
